@@ -1,0 +1,84 @@
+﻿<html>
+	<head>
+		<link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAJ6TrAFy+8QCC0vgA7+/vAC6n7ACE0/gAS2RuAKbU5QDAwMAAv+3+ACek6gApoeYAAAAAAAAAAAAAAAAARERERERERABEREREREREAEREREREREQAREREeIRERABJmZSohUREAERERKolVEQAREREozUVRABJmZRDNlFUAEREREQzZRUAREREREM2W1BJmZmZRDNlxUREREREQzZVREREREREMzVJmZmZmURDM0REREREREQzRERERERERAMAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA" rel="icon" type="image/x-icon" />
+		<style>
+			body{font-family:sans-serif;}
+			header img{margin-right:10px;}
+			th,input,textarea{padding-top:10px;}
+			.paciente td{width:100%; border-bottom:1px}
+			td input[type=text]{width:100%; height:28px; text-transform:uppercase; border-width:0 0 1px 0; font:inherit}
+			#data{height:28px; border-width:0 0 1px 0; text-align:center; font:inherit}
+			textarea{width:100%; border:0; font:inherit; resize:none}
+			#medicamentos,button{padding:5px;}
+			@media print {
+				@page { size: portrait; }
+				.noprint{display:none}
+			}
+		</style>
+		<script src="medicamentos.json"></script>
+		<script>
+			window.onload = function(){
+				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
+				var data = document.getElementById('data');
+				var texto = document.getElementById('texto');
+				data.value = new Date().toLocaleString("sv-SE",{dateStyle: "short", timeZone: "America/Sao_Paulo"});
+				var texto = document.getElementById('texto');
+				medicamentos.forEach(function(element,index,array){
+					var option = document.createElement("option");
+					option.text = element.nome;
+					option.value = element.descricao + '\n' + element.posologia + '\n\n' ;
+					document.getElementById('medicamentos').add(option);
+				});
+				const urlParams = new URLSearchParams(window.location.search);
+				document.getElementById('nome_paciente').value = urlParams.get('nome');
+				document.getElementById('id_paciente').value = urlParams.get('id');
+			}
+		</script>
+		<title>RECEITUÁRIO</title>
+	</head>
+	<body>
+		<header>
+			<img src="logo-sbc.jpg" height="100" align="left" />
+			<p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
+			<h2>RECEITUÁRIO</h2>
+			<p>SECRETARIA DE SAÚDE</p>
+		</header>
+		<br/>
+		<table class="paciente">
+			<tr>
+				<th>NOME:</th>
+				<td><input type="text" id="nome_paciente" autofocus /></td>
+			</tr>
+			<tr>
+				<th>HYGIA:</th>
+				<td><input type="text" id="id_paciente" /></td>
+			</tr>
+		</table>
+		<br/>
+		<p class="noprint">
+			<select id="medicamentos" onchange="texto.value += (this.value); this.value = 0">
+				<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
+			</select>
+			<button type="button" onclick="texto.value=''">Limpar tudo</button>
+			<button type="button" onclick="window.print()">Imprimir</button>
+		</p>
+		<textarea id="texto" rows="35"></textarea>
+		<table>
+			<tr style="width:100%">
+				<th>DATA:</th>
+				<td style="width:300px"><input type="date" id="data" /></td>
+				<td><input type="text" size="50" /></td>
+			</tr>
+			<tr>
+				<td colspan="2"></td>
+				<td align="center">CARIMBO E ASSINATURA</td>
+			</tr>
+		</table>
+		<h5 align="center">
+			UPA RIACHO GRANDE <br/>
+			Rua Marcilio Conrado, n 333 - Bairro Riacho Grande <br/>
+			São Bernardo do Campo - SP <br/>
+			CNPJ: 46.523.239/0001-47
+		</h5>
+	</body>
+</html>

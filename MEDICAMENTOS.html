@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+		<link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAJ6TrAFy+8QCC0vgA7+/vAC6n7ACE0/gAS2RuAKbU5QDAwMAAv+3+ACek6gApoeYAAAAAAAAAAAAAAAAARERERERERABEREREREREAEREREREREQAREREeIRERABJmZSohUREAERERKolVEQAREREozUVRABJmZRDNlFUAEREREQzZRUAREREREM2W1BJmZmZRDNlxUREREREQzZVREREREREMzVJmZmZmURDM0REREREREQzRERERERERAMAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA" rel="icon" type="image/x-icon" />
+		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+		<style>
+			@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
+			table, td input{width:100%; border-spacing:0;}
+			.paciente td{width:100%; border-bottom:1px}
+			#data{height:28px; border-width:0 0 1px 0; text-align:center; font:inherit}
+			textarea{width:100%; border:0; font:inherit; resize:none}
+			#medicamentos,button{padding:5px;}
+			@media print {
+				@page { size: landscape; }
+				.noprint{display:none}
+			}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+		<script src="medicamentos.json"></script>
+		<title>MEDICAMENTOS</title>
+</head>
+
+<body>
+
+<div ng-app="medicamentosApp" ng-controller="myCtrl">
+
+<nav class="navbar navbar-light bg-light shadow-sm sticky-top">
+	<div class="container-fluid">
+		<span class="navbar-brand bi-hospital mb-0 h1"> LISTA DE MEDICAMENTOS</span>
+		<span class="btn-group">
+			<a class="btn btn-primary bi-floppy-fill" title="Salvar" ng-click="salvar()"></a>
+			<a class="btn btn-secondary bi-filetype-json" title="Copiar JSON" ng-click="copyJSON()"></a>
+		</span>
+	</div>
+</nav>
+<div class="table-responsive text-nowrap">
+<table class="table table-hover">
+	<thead>
+		<tr>
+		<th></th>
+		<th>Nome</th>
+		<th>Descrição</th>
+		<th>Posologia</th>
+		<tr/>
+	</thead>
+	<tbody>
+	<tr ng-repeat="item in medicamentos">
+		<td class="noprint col col-sm-1">
+			<span class="btn-group">
+			<a class="btn bi-grip-vertical" title="Mover {{item.nome}}" index="{{$index}}" draggable="true" ondragstart="draggedID = this.getAttribute('index')" ondrop="move(draggedID,this.getAttribute('index'));" ondragover="event.preventDefault()"></a>
+			<a class="btn btn-primary bi-plus" title="Incluir novo" ng-click="medicamentos.splice($index+1,0,{})"></a>
+			<a class="btn btn-danger bi-trash" title="Excluir" ng-click="excluir($index,item.nome)"></a>
+			</span>
+		</td>
+		<td><input class="form-control" type="text" ng-model="item.nome" /></td>
+		<td><input class="form-control" type="text" ng-model="item.descricao" /></td>
+		<td><input class="form-control" type="text" ng-model="item.posologia" /></td>
+	</tr>
+	</tbody>
+</table>
+</div>
+</div>
+
+<script>
+var app = angular.module("medicamentosApp", []);
+app.controller("myCtrl", function($scope) {
+	move = function(id,to){
+		var copy = medicamentos[id];
+		medicamentos.splice(id,1);
+		medicamentos.splice(to,0,copy);
+		$scope.$apply();
+	}
+	if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
+	$scope.medicamentos = medicamentos;
+	$scope.excluir = function(id,nome){
+		if(confirm('Tem certeza que deseja excluir ' + nome + '?')){
+			medicamentos.splice(id,1);
+		}
+	}
+	
+	$scope.salvar = function(){
+		if(confirm('Deseja salvar as alterações?')){
+			window.localStorage.medicamentos = angular.toJson($scope.medicamentos);
+		}
+	}
+	$scope.copyJSON = function copyOnClick () {var tempInput = document.createElement ("textarea"); tempInput.textContent = angular.toJson(medicamentos); document.body.appendChild (tempInput); tempInput.select(); document.execCommand ("copy"); document.body.removeChild (tempInput); alert('Código copiado com sucesso');}
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+</body>
+</html>
