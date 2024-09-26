@@ -1,0 +1,24 @@
+// Cria um novo elemento input
+const buttonElement = document.createElement('a');
+if (document.getElementById('tspaciente') != null){
+const id_paciente = document.getElementById('tspaciente').innerHTML;
+const nome_paciente = document.getElementById('griFichasGBCR__ctl2_txtNomePac2').innerHTML;
+
+// Define o nome do button
+buttonElement.innerHTML = 'Receituário';
+buttonElement.target = '_blank';
+buttonElement.classList.add("TLinkButtonN");
+buttonElement.href = "https://llemesbarros.github.io/UPASBC/?id=" + id_paciente + "&nome=" + nome_paciente;
+
+
+// Estiliza o button para que ele apareça de forma visível
+buttonElement.style.position = 'fixed';
+buttonElement.style.top = '50px';
+buttonElement.style.right = '10px';
+buttonElement.style.zIndex = '1000';
+buttonElement.style.padding = '10px';
+buttonElement.style.fontSize = '16px';
+
+// Adiciona o input ao corpo da página
+document.body.appendChild(buttonElement);
+}
