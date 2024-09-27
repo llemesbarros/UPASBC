@@ -32,8 +32,8 @@
 				const urlParams = new URLSearchParams(window.location.search);
 				document.getElementById('nome_paciente').value = urlParams.get('nome');
 				document.getElementById('id_paciente').value = urlParams.get('id');
-				const unidade = {nome: 'UPA RIACHO GRANDE', endereco: 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande'};
-				switch(urlParams.get('unidade')){
+				const unidade = {nome: 'UPA RIACHO GRANDE', endereco: 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande',sigla:urlParams.get('unidade')};
+				switch(unidade.sigla){
 					case "UPARG":
 						unidade.nome = 'UPA RIACHO GRANDE';
 						unidade.endereco = 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande';
