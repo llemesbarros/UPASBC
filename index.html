@@ -46,6 +46,8 @@
 						unidade.nome = "UPA RIACHO GRANDE";
 						unidade.endereco = "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande";
 				}
+				document.getElementById('unidade_nome').innerHTML = unidade.nome;
+				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
 			}
 		</script>
 		<title>RECEITUÁRIO</title>
@@ -89,8 +91,8 @@
 			</tr>
 		</table>
 		<h5 align="center">
-			UPA RIACHO GRANDE <br/>
-			Rua Marcilio Conrado, n 333 - Bairro Riacho Grande <br/>
+			<span id="unidade_nome"></span> <br/>
+			<span id="unidade_endereco"></span> <br/>
 			São Bernardo do Campo - SP <br/>
 			CNPJ: 46.523.239/0001-47
 		</h5>
