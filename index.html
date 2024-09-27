@@ -32,8 +32,8 @@
 				const urlParams = new URLSearchParams(window.location.search);
 				document.getElementById('nome_paciente').value = urlParams.get('nome');
 				document.getElementById('id_paciente').value = urlParams.get('id');
+				const unidade = {nome: 'UPA RIACHO GRANDE', endereco: 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande'};
 				switch(document.getElementById('unidade').value){
-					var unidade = {};
 					case "UPARG":
 						unidade.nome = "UPA RIACHO GRANDE";
 						unidade.endereco = "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande";
@@ -43,8 +43,7 @@
 						unidade.endereco = "Rua Angela Tomé, n 256 - Bairro Rudge Ramos";
 						break;
 					default:
-						unidade.nome = "UPA RIACHO GRANDE";
-						unidade.endereco = "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande";
+						console.log('Unidade não fornecida')
 				}
 				document.getElementById('unidade_nome').innerHTML = unidade.nome;
 				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
