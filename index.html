@@ -32,7 +32,7 @@
 				const urlParams = new URLSearchParams(window.location.search);
 				document.getElementById('nome_paciente').value = urlParams.get('nome');
 				document.getElementById('id_paciente').value = urlParams.get('id');
-				var unidade = {};
+				unidade = {};
 				switch(document.getElementById('unidade').value){
 					case "UPARG":
 						unidade.nome = "UPA RIACHO GRANDE";
