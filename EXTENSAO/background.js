@@ -1,4 +1,4 @@
 chrome.action.onClicked.addListener(() => {
-    const url = "https://www.seulinkexterno.com";  // Substitua pelo link que você deseja abrir
+    const url = "https://llemesbarros.github.io/UPASBC/MEDICAMENTOS";
     chrome.tabs.create({ url });
 });
