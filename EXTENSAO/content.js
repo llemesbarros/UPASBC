@@ -9,7 +9,7 @@ const nome_paciente = document.getElementById('griFichasGBCR__ctl2_txtNomePac2')
 buttonElement.innerHTML = 'Receituário';
 buttonElement.target = '_blank';
 buttonElement.classList.add("TLinkButtonN");
-buttonElement.href = "https://llemesbarros.github.io/UPASBC/?unidade=" +  + "&id=" + id_paciente + "&nome=" + nome_paciente;
+buttonElement.href = "https://llemesbarros.github.io/UPASBC/?unidade=" + unidade + "&id=" + id_paciente + "&nome=" + nome_paciente;
 
 
 // Estiliza o button para que ele apareça de forma visível
