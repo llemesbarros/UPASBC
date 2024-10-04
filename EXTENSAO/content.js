@@ -2,13 +2,14 @@
 const buttonElement = document.createElement('a');
 if (document.getElementById('tspaciente') != null){
 const id_paciente = document.getElementById('tspaciente').innerHTML;
+const unidade = document.getElementById('Topo1_PageUS').innerHTML;
 const nome_paciente = document.getElementById('griFichasGBCR__ctl2_txtNomePac2').innerHTML;
 
 // Define o nome do button
 buttonElement.innerHTML = 'Receituário';
 buttonElement.target = '_blank';
 buttonElement.classList.add("TLinkButtonN");
-buttonElement.href = "https://llemesbarros.github.io/UPASBC/?id=" + id_paciente + "&nome=" + nome_paciente;
+buttonElement.href = "https://llemesbarros.github.io/UPASBC/?unidade=" +  + "&id=" + id_paciente + "&nome=" + nome_paciente;
 
 
 // Estiliza o button para que ele apareça de forma visível
