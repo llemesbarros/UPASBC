@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Link para receituário",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Adiciona um botão na tela de atendimento de paciente do Hygia para o Receituário",
   "permissions": [
     "activeTab"
@@ -13,7 +13,7 @@
     }
   ],
   "action": {
-    "default_title": "Configurar medicamentos",
+    "default_title": "Clique para gerenciar os medicamentos disponíveis no receituário",
     "default_icon": "icon.png"
   },
   "background": {
