@@ -80,7 +80,7 @@
 				}
 			}
 			window.onbeforeprint = function(){
-				document.getElementById('page2').innerHTML = document.getElementById('page1').innerHTML;
+				document.getElementById('page2').innerHTML = document.getElementById('page1').cloneNode(true);
 			}
 		</script>
 		<title>RECEITUÁRIO</title>
