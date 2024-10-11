@@ -92,7 +92,7 @@
 	</head>
 	<body>
 		<div id="page1">
-			<div id="pagenum"><span></span></div>
+			<div id="pagenum" class="noprint"><span></span></div>
 			<header>
 				<img src="logo-sbc.jpg" height="100" align="left" />
 				<p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
@@ -117,7 +117,7 @@
 				</select>
 				<button type="button" onclick="texto.value=''">Limpar tudo</button>
 				<button type="button" onclick="window.print()">Imprimir</button>
-				<label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
+				<label><input type="checkbox" id="segundavia" onchange="document.getElementById('pagenum').classList.toggle('noprint')" /> Imprimir 2 vias</label>
 			</p>
 			<textarea id="texto" autofocus rows="35"></textarea>
 			<table>
