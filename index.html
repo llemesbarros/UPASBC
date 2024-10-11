@@ -77,7 +77,6 @@
 			}
 			window.onbeforeprint = function(){
 				if(document.getElementById('segundavia').checked){
-					console.log('segunda via');
 					clone = document.getElementById('page1').cloneNode(true);
 					clone.id = 'page2';
 					clone.classList.add('printonly');
