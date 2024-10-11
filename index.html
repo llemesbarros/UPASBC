@@ -14,6 +14,9 @@
 				@page { size: portrait; }
 				.noprint{display:none}
 			}
+			@media screen {
+				.printonly{display:none}
+			}
 		</style>
 		<script src="medicamentos.json"></script>
 		<script>
@@ -68,52 +71,63 @@
 				document.getElementById('unidade_nome').innerHTML = unidade.nome;
 				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
 			}
+			function duplicarPagina(valor){
+				if(valor){
+					alert('sim');
+				}else{
+					alert('não');
+				}
+			}
 		</script>
 		<title>RECEITUÁRIO</title>
 	</head>
 	<body>
-		<header>
-			<img src="logo-sbc.jpg" height="100" align="left" />
-			<p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
-			<h2>RECEITUÁRIO</h2>
-			<p>SECRETARIA DE SAÚDE</p>
-		</header>
-		<br/>
-		<table class="paciente">
-			<tr>
-				<th>NOME:</th>
-				<td><input type="text" id="nome_paciente" /></td>
-			</tr>
-			<tr>
-				<th>HYGIA:</th>
-				<td><input type="text" id="id_paciente" /></td>
-			</tr>
-		</table>
-		<br/>
-		<p class="noprint">
-			<select id="medicamentos" onchange="texto.value += (this.value); this.value = 0">
-				<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
-			</select>
-			<button type="button" onclick="texto.value=''">Limpar tudo</button>
-			<button type="button" onclick="window.print()">Imprimir</button>
-		</p>
-		<textarea id="texto" autofocus rows="35"></textarea>
-		<table>
-			<tr style="width:100%">
-				<th>DATA:</th>
-				<td style="width:300px"><input type="date" id="data" /></td>
-				<td><input type="text" size="50" /></td>
-			</tr>
-			<tr>
-				<td colspan="2"></td>
-				<td align="center">CARIMBO E ASSINATURA</td>
-			</tr>
-		</table>
-		<h5 align="center">
-			<span id="unidade_nome"></span> <br/>
-			<span id="unidade_endereco"></span> <br/>
-			São Bernardo do Campo - SP <br/>
-			CNPJ: 46.523.239/0001-47
-		</h5>
+		<div id="page1">
+			<header>
+				<img src="logo-sbc.jpg" height="100" align="left" />
+				<p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
+				<h2>RECEITUÁRIO</h2>
+				<p>SECRETARIA DE SAÚDE</p>
+			</header>
+			<br/>
+			<table class="paciente">
+				<tr>
+					<th>NOME:</th>
+					<td><input type="text" id="nome_paciente" /></td>
+				</tr>
+				<tr>
+					<th>HYGIA:</th>
+					<td><input type="text" id="id_paciente" /></td>
+				</tr>
+			</table>
+			<br/>
+			<p class="noprint">
+				<select id="medicamentos" onchange="texto.value += (this.value); this.value = 0">
+					<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
+				</select>
+				<button type="button" onclick="texto.value=''">Limpar tudo</button>
+				<button type="button" onclick="window.print()">Imprimir</button>
+				<input type="checkbox" onchange="duplicarPagina(this.value)" />
+			</p>
+			<textarea id="texto" autofocus rows="35"></textarea>
+			<table>
+				<tr style="width:100%">
+					<th>DATA:</th>
+					<td style="width:300px"><input type="date" id="data" /></td>
+					<td><input type="text" size="50" /></td>
+				</tr>
+				<tr>
+					<td colspan="2"></td>
+					<td align="center">CARIMBO E ASSINATURA</td>
+				</tr>
+			</table>
+			<h5 align="center">
+				<span id="unidade_nome"></span> <br/>
+				<span id="unidade_endereco"></span> <br/>
+				São Bernardo do Campo - SP <br/>
+				CNPJ: 46.523.239/0001-47
+			</h5>
+		</div>
+		<div id="page2"></div>
 	</body>
 </html>
