@@ -79,6 +79,9 @@
 					document.getElementById('page2').classList.add('noprint');
 				}
 			}
+			window.onbeforeprint = function(){
+				document.getElementById('page2').innerHTML = document.getElementById('page1').innerHTML;
+			}
 		</script>
 		<title>RECEITUÁRIO</title>
 	</head>
