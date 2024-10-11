@@ -74,9 +74,9 @@
 			}
 			function duplicarPagina(valor){
 				if(valor){
-					alert(valor);
+					document.getElementById('page2').classList.remove('noprint');
 				}else{
-					alert(valor);
+					document.getElementById('page2').classList.add('noprint');
 				}
 			}
 		</script>
@@ -129,6 +129,6 @@
 				CNPJ: 46.523.239/0001-47
 			</h5>
 		</div>
-		<div id="page2"></div>
+		<div id="page2" class="printonly noprint"></div>
 	</body>
 </html>
