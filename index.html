@@ -14,6 +14,9 @@
 			@media print {
 				@page { size: portrait; }
 				.noprint{display:none}
+				#pagenum{font-size:10px;}
+				#page1 #pagenum span::after{ position: fixed; top: 10px; right: 10px; display:block; content:"1ª via farmácia"; }
+				#page2 #pagenum span::after{ position: fixed; top: 10px; right: 10px; display:block; content:"2ª via orientação ao paciente"; }
 			}
 			@media screen {
 				.printonly{display:none}
@@ -89,6 +92,7 @@
 	</head>
 	<body>
 		<div id="page1">
+			<div id="pagenum"><span></span></div>
 			<header>
 				<img src="logo-sbc.jpg" height="100" align="left" />
 				<p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
