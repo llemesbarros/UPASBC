@@ -86,7 +86,7 @@ app.controller("myCtrl", function($scope) {
 	}
 	$scope.copyJSON = function copyOnClick () {var tempInput = document.createElement ("textarea"); tempInput.textContent = angular.toJson(medicamentos); document.body.appendChild (tempInput); tempInput.select(); document.execCommand ("copy"); document.body.removeChild (tempInput); alert('Código copiado com sucesso');}
 	$scope.pasteJSON = function pasteOnClick () {
-		let code = prompt("Cole o código JSON aqui", medicamentos);
+		let code = prompt("Cole o código JSON aqui", angular.toJson($scope.medicamentos));
 		if (code != null) {
 			$scope.medicamentos=JSON.parse(code);
 			window.localStorage.medicamentos = angular.toJson($scope.medicamentos);
