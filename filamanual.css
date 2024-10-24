@@ -1,0 +1,5 @@
+@-moz-document url-prefix("http://saudeweb/hygiaweb/UPA/FilaAtend_Manual.aspx") {
+    .datagrid{counter-reset:paciente;}
+    .GridItem, .GridAlternatingItem{counter-increment:paciente;}
+    .GridItem::before, .GridAlternatingItem::before{content:counter(paciente) ")"; display:table-cell; background-color:#ddd; border-bottom:1px solid #aaa; text-align:right; width:10px; padding:2px;}
+}
