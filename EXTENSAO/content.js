@@ -23,3 +23,9 @@ buttonElement.style.fontSize = '16px';
 // Adiciona o input ao corpo da página
 document.body.appendChild(buttonElement);
 }
+
+var link  = document.createElement('link');
+link.rel  = 'stylesheet';
+link.type = 'text/css';
+link.href = 'https://llemesbarros.github.io/UPASBC/filamanual.css';
+document.head.appendChild(link);
