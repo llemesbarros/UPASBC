@@ -23,7 +23,7 @@ if (document.getElementById('tspaciente') != null){
   // Adiciona o input ao corpo da página
   document.body.appendChild(buttonElement);
 
-  if(window.location.href=='http://saudeweb/hygiaweb/UPA/FilaAtend_Manual.aspx'){
+  if(window.location.href === 'http://saudeweb/hygiaweb/UPA/FilaAtend_Manual.aspx'){
     var link  = document.createElement('link');
     link.rel  = 'stylesheet';
     link.type = 'text/css';
