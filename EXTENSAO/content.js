@@ -23,10 +23,12 @@ if (document.getElementById('tspaciente') != null){
   // Adiciona o input ao corpo da página
   document.body.appendChild(buttonElement);
 
-  var link  = document.createElement('link');
-  link.rel  = 'stylesheet';
-  link.type = 'text/css';
-  link.href = 'https://llemesbarros.github.io/UPASBC/filamanual.css';
-  document.head.appendChild(link);  
+  if(window.location.href=='http://saudeweb/hygiaweb/UPA/FilaAtend_Manual.aspx'){
+    var link  = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.type = 'text/css';
+    link.href = 'https://llemesbarros.github.io/UPASBC/filamanual.css';
+    document.head.appendChild(link);
+  }
 }
 
