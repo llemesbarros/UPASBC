@@ -13,9 +13,8 @@
 			#page1{page-break-after: always;}
 			@media print {
 				@page { size: A4 portrait; }
-				.noprint{display:none}
+				#pagenum, .noprint{display:none}
 				body.duasvias{font-size:150%;}
-				#pagenum{font-size:14px; display:none;}
 				body.duasvias #pagenum{font-size:14px; display:inherit;}
 				#page1 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"1ª VIA FARMÁCIA"; }
 				#page2 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"2ª VIA PACIENTE"; }
