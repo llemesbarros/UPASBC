@@ -11,9 +11,10 @@
 			textarea{width:100%; height: 640px; border:0; font:inherit; resize:none}
 			#medicamentos,button{padding:5px;}
 			#page1{page-break-after: always;}
+			#pagenum{display:none}
 			@media print {
 				@page { size: A4 portrait; }
-				#pagenum, .noprint{display:none}
+				.noprint{display:none}
 				body.duasvias{font-size:150%;}
 				body.duasvias #pagenum{font-size:14px; display:inherit;}
 				#page1 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"1ª VIA FARMÁCIA"; }
