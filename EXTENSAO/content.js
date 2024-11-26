@@ -38,7 +38,7 @@ tdExameFisico.prepend(btnExameFisico);
 
 }
 
-if(location.origin + location.pathname === 'http://saudeweb/hygiaweb/UPA/FilaAtend_Manual.aspx'){
+if(location.origin + location.pathname === 'http://saudeweb/hygiaweb/UPA/FilaAtend_Manual.aspx' || location.origin + location.pathname === 'http://saudeweb/hygiaweb/UPA/FilaAtend.aspx'){
 	var link  = document.createElement('link');
 	link.rel  = 'stylesheet';
 	link.type = 'text/css';
