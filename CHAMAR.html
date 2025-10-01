@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Texto para Áudio</title>
+</head>
+<body>
+  <h3>Transformar texto em áudio</h3>
+  <input type="text" id="texto" placeholder="Digite algo...">
+  <button onclick="falar()">🔊 Reproduzir</button>
+
+  <script>
+    function falar() {
+      const texto = document.getElementById("texto").value;
+      const utter = new SpeechSynthesisUtterance(texto);
+      utter.lang = "pt-BR"; // voz em português
+      speechSynthesis.speak(utter);
+    }
+  </script>
+</body>
+</html>
