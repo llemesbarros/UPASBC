@@ -1,0 +1,189 @@
+
+Add floating stamp to index.html
+4 de nov.
+·
+UPASBC
+·
+main
+·
++43
+-16
+
+Desarquivar
+
+Compartilhar
+
+Criar PR
+
+
+na pagina index.html eu quero colocar como se fosse um carimbo flutuando na diagonal, sobre a parte "assinatura e carimbo" com os dizeres em negrito:
+Dr. Lucas Lemes 
+CRM-SP 196472
+Copiar
+Summary
+
+Added styles for the signature container and floating stamp to create a diagonal seal emphasizing the signature area with bold doctor details.
+
+Wrapped the signature table in the new container and inserted the rotated stamp content above the “CARIMBO E ASSINATURA” section.
+
+Testing
+
+⚠️ Tests not run (not requested)
+
+
+Arquivo (1)
+
+index.html
++43
+-16
+
+
+Diferença
+Registros
+
+index.html
++43
+-16
+
+﻿<html>
+	<head>
+		<link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAJ6TrAFy+8QCC0vgA7+/vAC6n7ACE0/gAS2RuAKbU5QDAwMAAv+3+ACek6gApoeYAAAAAAAAAAAAAAAAARERERERERABEREREREREAEREREREREQAREREeIRERABJmZSohUREAERERKolVEQAREREozUVRABJmZRDNlFUAEREREQzZRUAREREREM2W1BJmZmZRDNlxUREREREQzZVREREREREMzVJmZmZmURDM0REREREREQzRERERERERAMAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA" rel="icon" type="image/x-icon" />
+		<style>
+			body{font-family:sans-serif;}
+			header img{margin-right:10px;}
+			th,input,textarea{padding-top:10px;}
+			.paciente td{width:100%; border-bottom:1px}
+			td input[type=text]{width:100%; height:28px; text-transform:uppercase; border-width:0 0 1px 0; font:inherit}
+			#data{height:28px; border-width:0 0 1px 0; text-align:center; font:inherit}
+			textarea{width:100%; height: 640px; border:0; font:inherit; resize:none}
+			#medicamentos,button{padding:5px;}
+			#page1{page-break-after: always;}
+			#pagenum{display:none}
+			@media print {
+				@page { size: A4 portrait; }
+				.noprint{display:none}
+				body.duasvias textarea{font-size:130%;}
+				body.duasvias #pagenum{font-size:14px; display:inherit;}
+				#page1 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"1ª VIA FARMÁCIA"; }
+				#page2 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"2ª VIA PACIENTE"; }
+				#page1, #page2 {page-break-inside: avoid;}
+			}
+			@media screen {
+				.printonly{display:none}
+			}
+		</style>
+                        @media screen {
+                                .printonly{display:none}
+                        }
+                        .signature-container{
+                                position:relative;
+                                width:100%;
+                                margin-top:10px;
+                        }
+                        .signature-stamp{
+                                position:absolute;
+                                top:-40px;
+                                right:10%;
+                                transform:rotate(-20deg);
+                                font-weight:bold;
+                                color:#b22222;
+                                border:3px solid #b22222;
+                                padding:12px 18px;
+                                border-radius:8px;
+                                background-color:rgba(255,255,255,0.85);
+                                text-align:center;
+                                text-transform:uppercase;
+                                letter-spacing:1px;
+                                box-shadow:0 4px 10px rgba(0,0,0,0.15);
+                                pointer-events:none;
+                        }
+                </style>
+		<script src="medicamentos.json"></script>
+		<script>
+			window.onload = function(){
+				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
+				var data = document.getElementById('data');
+				var texto = document.getElementById('texto');
+				data.value = new Date().toLocaleString("sv-SE",{dateStyle: "short", timeZone: "America/Sao_Paulo"});
+				var texto = document.getElementById('texto');
+				medicamentos.forEach(function(element,index,array){
+					var option = document.createElement("option");
+					option.text = element.nome;
+					option.value = element.descricao + '\n' + element.posologia + '\n\n' ;
+					document.getElementById('medicamentos').add(option);
+				});
+				const urlParams = new URLSearchParams(window.location.search);
+				document.getElementById('nome_paciente').value = urlParams.get('nome');
+				document.getElementById('id_paciente').value = urlParams.get('id');
+				const unidade = {nome: urlParams.get('unidade'), endereco: 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande'};
+				switch(urlParams.get('unidade')){
+					case "UPA RIACHO GRANDE":
+						unidade.endereco = 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande';
+						break;
+					case "UPA RUDGE RAMOS":
+						unidade.endereco = 'Rua Angela Tomé, n 256 - Bairro Rudge Ramos';
+						break;
+@@ -101,46 +123,51 @@
+				<img src="logo-sbc.jpg" height="100" align="left" />
+				<p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
+				<h2>RECEITUÁRIO</h2>
+				<p>SECRETARIA DE SAÚDE</p>
+			</header>
+			<br/>
+			<table class="paciente">
+				<tr>
+					<th>NOME:</th>
+					<td><input type="text" id="nome_paciente" /></td>
+				</tr>
+				<tr>
+					<th>HYGIA:</th>
+					<td><input type="text" id="id_paciente" /></td>
+				</tr>
+			</table>
+			<br/>
+			<p class="noprint">
+				<select id="medicamentos" onchange="texto.value += (this.value); this.value = 0">
+					<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
+				</select>
+				<button type="button" onclick="texto.value=''">Limpar tudo</button>
+				<button type="button" onclick="window.print()">Imprimir</button>
+				<label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
+			</p>
+			<textarea id="texto" autofocus rows="35"></textarea>
+			<table>
+				<tr style="width:100%">
+					<th>DATA:</th>
+					<td style="width:300px"><input type="date" id="data" /></td>
+					<td><input type="text" size="50" /></td>
+				</tr>
+				<tr>
+					<td colspan="2"></td>
+					<td align="center">CARIMBO E ASSINATURA</td>
+				</tr>
+			</table>
+                        <textarea id="texto" autofocus rows="35"></textarea>
+                        <div class="signature-container">
+                                <div class="signature-stamp">
+                                        <strong>Dr. Lucas Lemes<br/>CRM-SP 196472</strong>
+                                </div>
+                                <table>
+                                        <tr style="width:100%">
+                                                <th>DATA:</th>
+                                                <td style="width:300px"><input type="date" id="data" /></td>
+                                                <td><input type="text" size="50" /></td>
+                                        </tr>
+                                        <tr>
+                                                <td colspan="2"></td>
+                                                <td align="center">CARIMBO E ASSINATURA</td>
+                                        </tr>
+                                </table>
+                        </div>
+			<h5 align="center">
+				<span id="unidade_nome"></span> <br/>
+				<span id="unidade_endereco"></span> <br/>
+				São Bernardo do Campo - SP <br/>
+				CNPJ: 46.523.239/0001-47
+			</h5>
+		</div>
+	</body>
+</html>
