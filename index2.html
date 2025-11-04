@@ -25,32 +25,6 @@
 				.printonly{display:none}
 			}
 		</style>
-                        @media screen {
-                                .printonly{display:none}
-                        }
-                        .signature-container{
-                                position:relative;
-                                width:100%;
-                                margin-top:10px;
-                        }
-                        .signature-stamp{
-                                position:absolute;
-                                top:-40px;
-                                right:10%;
-                                transform:rotate(-20deg);
-                                font-weight:bold;
-                                color:#b22222;
-                                border:3px solid #b22222;
-                                padding:12px 18px;
-                                border-radius:8px;
-                                background-color:rgba(255,255,255,0.85);
-                                text-align:center;
-                                text-transform:uppercase;
-                                letter-spacing:1px;
-                                box-shadow:0 4px 10px rgba(0,0,0,0.15);
-                                pointer-events:none;
-                        }
-                </style>
 		<script src="medicamentos.json"></script>
 		<script>
 			window.onload = function(){
@@ -76,7 +50,54 @@
 					case "UPA RUDGE RAMOS":
 						unidade.endereco = 'Rua Angela Tomé, n 256 - Bairro Rudge Ramos';
 						break;
-@@ -101,46 +123,51 @@
+					case "UPA BAETA NEVES":
+						unidade.endereco = 'R. dos Vianas, 933 - Baeta Neves';
+						break;
+					case "UPA ALVES DIAS/ASSUNÇÃO":
+						unidade.endereco = 'Av. Humberto de Alencar Castelo Branco, 4220 - Alves Dias';
+						break;	
+					case "UPA UPA DEMARCHI/BATISTINI":
+						unidade.endereco = 'R. Valdomiro Luís, 303 - Demarchi';
+						break;	
+					case "UPA PAULICEIA/TABOAO":
+						unidade.endereco = 'R. Pedro de Tolêdo, 326 - Paulicéia';
+						break;	
+					case "UPA SAO PEDRO":
+						unidade.endereco = 'Av. Dom Pedro de Alcântara, 273 - Montanhão';
+						break;	
+					case "UPA SILVINA":
+						unidade.endereco = 'Av. Dr. José Fornari, 509 - Ferrazópolis';
+						break;	
+					case "UPA UNIÃO/ALVARENGA":
+						unidade.endereco = 'Estr. dos Alvarengas, 5779 - Alvarenga';
+						break;	
+					default:
+						unidade.nome = 'UPA RIACHO GRANDE';
+						console.log('Unidade não fornecida')
+				}
+				document.getElementById('unidade_nome').innerHTML = unidade.nome;
+				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
+			}
+			window.onbeforeprint = function(){
+				if(document.getElementById('segundavia').checked){
+					clone = document.getElementById('page1').cloneNode(true);
+					clone.id = 'page2';
+					clone.classList.add('printonly');
+					document.body.classList.add('duasvias');
+					document.body.appendChild(clone);
+				}
+			}
+			window.onafterprint = function(){
+				document.getElementById('page2').remove();
+				document.body.classList.remove('duasvias');
+			}
+		</script>
+		<title>RECEITUÁRIO</title>
+	</head>
+	<body>
+		<div id="page1">
+			<div id="pagenum" class="noprint"><span></span></div>
+			<header>
 				<img src="logo-sbc.jpg" height="100" align="left" />
 				<p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
 				<h2>RECEITUÁRIO</h2>
@@ -114,23 +135,6 @@
 					<td align="center">CARIMBO E ASSINATURA</td>
 				</tr>
 			</table>
-                        <textarea id="texto" autofocus rows="35"></textarea>
-                        <div class="signature-container">
-                                <div class="signature-stamp">
-                                        <strong>Dr. Lucas Lemes<br/>CRM-SP 196472</strong>
-                                </div>
-                                <table>
-                                        <tr style="width:100%">
-                                                <th>DATA:</th>
-                                                <td style="width:300px"><input type="date" id="data" /></td>
-                                                <td><input type="text" size="50" /></td>
-                                        </tr>
-                                        <tr>
-                                                <td colspan="2"></td>
-                                                <td align="center">CARIMBO E ASSINATURA</td>
-                                        </tr>
-                                </table>
-                        </div>
 			<h5 align="center">
 				<span id="unidade_nome"></span> <br/>
 				<span id="unidade_endereco"></span> <br/>
@@ -140,3 +144,4 @@
 		</div>
 	</body>
 </html>
+
