@@ -21,10 +21,32 @@
 				#page2 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"2ª VIA PACIENTE"; }
 				#page1, #page2 {page-break-inside: avoid;}
 			}
-			@media screen {
-				.printonly{display:none}
-			}
-		</style>
+                        @media screen {
+                                .printonly{display:none}
+                        }
+                        .signature-container{
+                                position:relative;
+                                width:100%;
+                                margin-top:10px;
+                        }
+                        .signature-stamp{
+                                position:absolute;
+                                top:-40px;
+                                right:10%;
+                                transform:rotate(-20deg);
+                                font-weight:bold;
+                                color:#b22222;
+                                border:3px solid #b22222;
+                                padding:12px 18px;
+                                border-radius:8px;
+                                background-color:rgba(255,255,255,0.85);
+                                text-align:center;
+                                text-transform:uppercase;
+                                letter-spacing:1px;
+                                box-shadow:0 4px 10px rgba(0,0,0,0.15);
+                                pointer-events:none;
+                        }
+                </style>
 		<script src="medicamentos.json"></script>
 		<script>
 			window.onload = function(){
@@ -123,18 +145,23 @@
 				<button type="button" onclick="window.print()">Imprimir</button>
 				<label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
 			</p>
-			<textarea id="texto" autofocus rows="35"></textarea>
-			<table>
-				<tr style="width:100%">
-					<th>DATA:</th>
-					<td style="width:300px"><input type="date" id="data" /></td>
-					<td><input type="text" size="50" /></td>
-				</tr>
-				<tr>
-					<td colspan="2"></td>
-					<td align="center">CARIMBO E ASSINATURA</td>
-				</tr>
-			</table>
+                        <textarea id="texto" autofocus rows="35"></textarea>
+                        <div class="signature-container">
+                                <div class="signature-stamp">
+                                        <strong>Dr. Lucas Lemes<br/>CRM-SP 196472</strong>
+                                </div>
+                                <table>
+                                        <tr style="width:100%">
+                                                <th>DATA:</th>
+                                                <td style="width:300px"><input type="date" id="data" /></td>
+                                                <td><input type="text" size="50" /></td>
+                                        </tr>
+                                        <tr>
+                                                <td colspan="2"></td>
+                                                <td align="center">CARIMBO E ASSINATURA</td>
+                                        </tr>
+                                </table>
+                        </div>
 			<h5 align="center">
 				<span id="unidade_nome"></span> <br/>
 				<span id="unidade_endereco"></span> <br/>
