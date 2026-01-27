@@ -10,6 +10,8 @@
 			#data{height:28px; border-width:0 0 1px 0; text-align:center; font:inherit}
 			textarea{width:100%; border:0; font:inherit; resize:none}
 			#medicamentos,button{padding:5px;}
+			tbody tr:hover{padding-top:28px;}
+			* { transition: all 0.5s ease;}
 			@media print {
 				@page { size: landscape; }
 				.noprint{display:none}
@@ -44,7 +46,7 @@
 		<th>Posologia</th>
 		<tr/>
 	</thead>
-	<tbody>
+	<tbody class="dragbox">
 	<tr ng-repeat="item in medicamentos">
 		<td class="noprint col col-sm-1">
 			<span class="btn-group">
@@ -98,3 +100,4 @@ app.controller("myCtrl", function($scope) {
 
 </body>
 </html>
+
