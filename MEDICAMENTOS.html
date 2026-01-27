@@ -10,7 +10,7 @@
 			#data{height:28px; border-width:0 0 1px 0; text-align:center; font:inherit}
 			textarea{width:100%; border:0; font:inherit; resize:none}
 			#medicamentos,button{padding:5px;}
-			tbody tr:hover td{padding-top:28px;}
+			td.dragOver{padding-top:28px;}
 			* { transition: all 0.5s ease;}
 			@media print {
 				@page { size: landscape; }
@@ -50,7 +50,7 @@
 	<tr ng-repeat="item in medicamentos">
 		<td class="noprint col col-sm-1">
 			<span class="btn-group">
-			<a class="btn bi-grip-vertical" title="Mover {{item.nome}}" index="{{$index}}" draggable="true" ondragstart="draggedID = this.getAttribute('index')" ondrop="move(draggedID,this.getAttribute('index'));" ondragover="event.preventDefault()"></a>
+			<a class="btn bi-grip-vertical" title="Mover {{item.nome}}" index="{{$index}}" draggable="true" ondragstart="draggedID = this.getAttribute('index')" ondrop="move(draggedID,this.getAttribute('index'));" ondragleave="toggleOver(this.getAttribute('index'))" ondragover="toggleOver(this.getAttribute('index'))"></a>
 			<a class="btn btn-primary bi-plus" title="Incluir novo" ng-click="medicamentos.splice($index+1,0,{})"></a>
 			<a class="btn btn-danger bi-trash" title="Excluir" ng-click="excluir($index,item.nome)"></a>
 			</span>
@@ -72,6 +72,9 @@ app.controller("myCtrl", function($scope) {
 		medicamentos.splice(id,1);
 		medicamentos.splice(to,0,copy);
 		$scope.$apply();
+	}
+	toggleOver = function(id){
+		medicamentos[id].classList.toggle('dragOver');
 	}
 	if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
 	$scope.medicamentos = medicamentos;
@@ -100,5 +103,6 @@ app.controller("myCtrl", function($scope) {
 
 </body>
 </html>
+
 
 
