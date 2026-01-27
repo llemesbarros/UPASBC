@@ -73,8 +73,8 @@ app.controller("myCtrl", function($scope) {
 		medicamentos.splice(to,0,copy);
 		$scope.$apply();
 	}
-	toggleOver = function(target){
-		console.log(target.parentElement.classList);
+	toggleOver = function(target,task){
+		console.log(target.parentElement);
 		target.parentElement.classList.toggle('dragOver');
 	}
 	if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
@@ -104,6 +104,7 @@ app.controller("myCtrl", function($scope) {
 
 </body>
 </html>
+
 
 
 
