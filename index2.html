@@ -124,36 +124,35 @@
 
     function addMedicamento(selectEl) {
       if (!quill) return;
-
+    
       const opt = selectEl.selectedOptions && selectEl.selectedOptions[0];
       if (!opt || opt.value === "0") return;
-
-      const desc = (opt.dataset && opt.dataset.desc) ? opt.dataset.desc : "";
-      const pos  = (opt.dataset && opt.dataset.pos)  ? opt.dataset.pos  : "";
-      if (!desc && !pos) return;
-
-      // inserir no fim (antes do \n final)
+    
+      const desc = opt.dataset.desc || "";
+      const pos  = opt.dataset.pos  || "";
+      if (!desc) return;
+    
       const idx = Math.max(0, quill.getLength() - 1);
-
-      // Monta 1 linha (1 item de lista)
-      // Descrição em negrito, depois separador e posologia
-      const linha = `${desc}${pos ? '\n' + " — " + pos : ""}`;
-
-      // Insere o texto
-      quill.insertText(idx, linha, { bold: false }, 'user');
-
-      // Deixa só a descrição em negrito
-      if (desc.length > 0) {
-        quill.formatText(idx, desc.length, { bold: true }, 'user');
+    
+      // Linha 1: descrição (em negrito)
+      quill.insertText(idx, desc, { bold: true }, 'user');
+    
+      // quebra de linha dentro do mesmo item
+      quill.insertText(idx + desc.length, "\n", {}, 'user');
+    
+      // Linha 2: posologia (texto normal)
+      if (pos) {
+        quill.insertText(idx + desc.length + 1, pos, {}, 'user');
       }
-
-      // Fecha a linha e aplica LISTA ORDENADA nessa linha => vira <ol><li>...</li></ol>
-      quill.insertText(idx + linha.length, "\n", { list: "ordered" }, 'user');
-
-      // Mantém o cursor no fim, fora de uma seleção estranha
-      quill.setSelection(quill.getLength() - 1, 0, 'silent');
-
-      // Reset e foco no select
+    
+      const endIndex = idx + desc.length + 1 + (pos ? pos.length : 0);
+    
+      // Agora aplicamos a lista ordenada ao bloco inteiro
+      quill.formatLine(idx, endIndex - idx + 1, { list: "ordered" }, 'user');
+    
+      // quebra final para próximo item fora da seleção
+      quill.insertText(quill.getLength() - 1, "\n", {}, 'user');
+    
       selectEl.value = "0";
       selectEl.focus();
     }
