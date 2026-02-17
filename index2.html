@@ -24,6 +24,9 @@
       font-size: 16px;
       line-height: 1.5;
     }
+    
+    /* Garante que o BR seja visível dentro do editor */
+    .ql-editor br { display: inline; }
 
     /* ====== Ordered list styling inside editor ====== */
     .ql-editor ol{
@@ -133,7 +136,6 @@
       quill.insertText(base + desc.length, "\n", { list: "ordered" }, "user");
 
       // 2) agora o item já existe; inserir <br> e posologia ANTES do \n do <li>
-      //    (o \n do <li> está exatamente na posição base + desc.length)
       let insertAt = base + desc.length;
 
       if (pos) {
@@ -172,11 +174,11 @@
       Font.whitelist = ["sans-serif", "serif", "monospace", "roboto"];
       Quill.register(Font, true);
 
-      // Register <br/> embed (inline) — evita virar novo <li>
+      // Register <br/> embed (inline)
       const Embed = Quill.import("blots/embed");
       class BreakBlot extends Embed {
         static blotName = "break";
-        static tagName = "BR";
+        static tagName = "br";
       }
       Quill.register(BreakBlot, true);
 
@@ -186,12 +188,19 @@
         modules: { toolbar: "#toolbar" }
       });
 
-      // Shift+Enter => <br/> (override do comportamento padrão)
-      quill.keyboard.addBinding({ key: 13, shiftKey: true }, function(range) {
-        this.quill.insertEmbed(range.index, "break", true, "user");
-        this.quill.setSelection(range.index + 1, 0, "silent");
-        return false;
+      // === CORREÇÃO: Shift+Enter => <br/> com prioridade ALTA ===
+      const keyboard = quill.getModule('keyboard');
+      keyboard.addBinding({ 
+          key: 13, // Enter
+          shiftKey: true 
+      }, {
+          priority: 1000 // Garante prioridade sobre o módulo de Lista
+      }, function(range, context) {
+          this.quill.insertEmbed(range.index, "break", true, "user");
+          this.quill.setSelection(range.index + 1, 0, "silent");
+          return false; // Impede a ação padrão (criar novo LI)
       });
+      // ==========================================================
 
       // Date
       const data = document.getElementById("data");
@@ -314,7 +323,6 @@
       <label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
     </p>
 
-    <!-- Custom toolbar for Quill (with font picker) -->
     <div id="toolbar" class="noprint">
       <span class="ql-formats">
         <select class="ql-font">
@@ -348,7 +356,6 @@
       </span>
     </div>
 
-    <!-- Editor -->
     <div id="texto"></div>
 
     <table>
