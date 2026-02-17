@@ -129,19 +129,28 @@
     function addMedicamento(selectEl) {
       const html = selectEl.value;
       if (!html || html === "0") return;
-
-      // Insert before the trailing \n
-      const insertAt = Math.max(0, quill.getLength() - 1);
-
-      // Insert as a custom blot to preserve <div class="med-item">
-      quill.insertEmbed(insertAt, 'meditem', html, 'user');
-
-      // New line after the block (helps spacing/cursor)
+    
+      const range = quill.getSelection(true);
+      const insertAt = range ? range.index : (quill.getLength() - 1);
+    
+      // cola o HTML no ponto de inserção (vira conteúdo normal)
+      quill.clipboard.dangerouslyPasteHTML(insertAt, html, 'user');
+    
+      // transforma o(s) bloco(s) recém inseridos no formato "meditem" (DIV.med-item)
+      // Pega o tamanho inserido aproximado: usa uma âncora simples
+      const after = quill.getSelection(true);
+      const endIndex = after ? after.index : quill.getLength() - 1;
+    
+      // Aplica o formato de bloco do início ao fim inserido
+      quill.formatLine(insertAt, Math.max(1, endIndex - insertAt), 'meditem', true, 'user');
+    
+      // Garante uma linha vazia após o item (pra facilitar continuar)
       quill.insertText(quill.getLength() - 1, "\n", 'user');
-
+    
       selectEl.value = "0";
       selectEl.focus();
     }
+
 
     function limparTudo() {
       if (!quill) return;
@@ -159,23 +168,18 @@
       Font.whitelist = ['sans-serif', 'serif', 'monospace', 'roboto'];
       Quill.register(Font, true);
 
-      // === Custom blot to preserve med-item wrapper ===
-      const BlockEmbed = Quill.import('blots/block/embed');
-      class MedItemBlot extends BlockEmbed {
+
+      // === Blot custom EDITÁVEL para manter <div class="med-item"> ===
+      const Block = Quill.import('blots/block');
+      
+      class MedItemBlot extends Block {
         static blotName = 'meditem';
         static tagName = 'DIV';
         static className = 'med-item';
-
-        static create(value) {
-          const node = super.create();
-          node.innerHTML = value || '';
-          return node;
-        }
-        static value(node) {
-          return node.innerHTML;
-        }
       }
+      
       Quill.register(MedItemBlot, true);
+
 
       // Init Quill with custom toolbar
       quill = new Quill('#texto', {
