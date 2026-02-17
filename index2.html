@@ -21,28 +21,13 @@
 				#page2 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"2ª VIA PACIENTE"; }
 				#page1, #page2 {page-break-inside: avoid;}
 			}
-                        @media screen {
-                                .printonly{display:none}
-                        }
-                        .signature-container{
-                                position:relative;
-                                width:100%;
-                                margin-top:10px;
-                        }
-                        .signature-stamp{
-                                position:absolute;
-                                top:-40px;
-                                right:10%;
-                                transform:rotate(-20deg);
-                                font-weight:bold;
-                                padding:12px 18px;
-                                border-radius:8px;
-                                text-align:center;
-                                letter-spacing:0.5px;
-                                pointer-events:none;
-                        }
-                </style>
+			@media screen {
+				.printonly{display:none}
+			}
+		</style>
 		<script src="medicamentos.json"></script>
+		<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.core.css" rel="stylesheet">
+		<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.core.js"></script>
 		<script>
 			window.onload = function(){
 				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
@@ -94,6 +79,7 @@
 				}
 				document.getElementById('unidade_nome').innerHTML = unidade.nome;
 				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
+				const quill = new Quill('#texto');
 			}
 			window.onbeforeprint = function(){
 				if(document.getElementById('segundavia').checked){
@@ -133,30 +119,25 @@
 			</table>
 			<br/>
 			<p class="noprint">
-				<select id="medicamentos" onchange="texto.value += (this.value); this.value = 0">
+				<select id="medicamentos" onchange="texto.innerHTML += (this.value); this.value = 0">
 					<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
 				</select>
 				<button type="button" onclick="texto.value=''">Limpar tudo</button>
 				<button type="button" onclick="window.print()">Imprimir</button>
 				<label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
 			</p>
-                        <textarea id="texto" autofocus rows="35"></textarea>
-                        <div class="signature-container">
-                                <div class="signature-stamp">
-                                        <strong>Dr. Lucas Lemes<br/>CRM-SP 196472</strong>
-                                </div>
-                                <table>
-                                        <tr style="width:100%">
-                                                <th>DATA:</th>
-                                                <td style="width:300px"><input type="date" id="data" /></td>
-                                                <td><input type="text" size="50" /></td>
-                                        </tr>
-                                        <tr>
-                                                <td colspan="2"></td>
-                                                <td align="center">CARIMBO E ASSINATURA</td>
-                                        </tr>
-                                </table>
-                        </div>
+			<div id="texto" tabindex="-1" autofocus></div>
+			<table>
+				<tr style="width:100%">
+					<th>DATA:</th>
+					<td style="width:300px"><input type="date" id="data" /></td>
+					<td><input type="text" size="50" /></td>
+				</tr>
+				<tr>
+					<td colspan="2"></td>
+					<td align="center">CARIMBO E ASSINATURA</td>
+				</tr>
+			</table>
 			<h5 align="center">
 				<span id="unidade_nome"></span> <br/>
 				<span id="unidade_endereco"></span> <br/>
@@ -166,4 +147,3 @@
 		</div>
 	</body>
 </html>
-
