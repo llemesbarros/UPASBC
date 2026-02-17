@@ -33,7 +33,7 @@
 				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
 				const quill = new Quill('#texto', {theme: 'snow'});
 				var data = document.getElementById('data');
-				var texto = document.getElementsByClassName('ql-editor')[0];
+				var content_editor = document.getElementsByClassName('ql-editor')[0];
 				data.value = new Date().toLocaleString("sv-SE",{dateStyle: "short", timeZone: "America/Sao_Paulo"});
 				medicamentos.forEach(function(element,index,array){
 					var option = document.createElement("option");
@@ -79,7 +79,7 @@
 				}
 				document.getElementById('unidade_nome').innerHTML = unidade.nome;
 				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
-				var texto = document.getElementsByClassName('ql-editor')[0];
+				var content_editor = document.getElementsByClassName('ql-editor')[0];
 				console.log(document.getElementsByClassName('ql-editor')[0]);
 			}
 			window.onbeforeprint = function(){
@@ -122,10 +122,10 @@
 			</table>
 			<br/>
 			<p class="noprint">
-				<select id="medicamentos" onchange="texto.innerHTML += (this.value); this.value = 0">
+				<select id="medicamentos" onchange="content_editor.innerHTML += (this.value); this.value = 0">
 					<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
 				</select>
-				<button type="button" onclick="texto.innerHTML=''">Limpar tudo</button>
+				<button type="button" onclick="content_editor.innerHTML=''">Limpar tudo</button>
 				<button type="button" onclick="window.print()">Imprimir</button>
 				<label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
 			</p>
