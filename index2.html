@@ -130,21 +130,16 @@
       const html = selectEl.value;
       if (!html || html === "0") return;
     
-      const range = quill.getSelection(true);
-      const insertAt = range ? range.index : (quill.getLength() - 1);
+      // insere no fim (antes do \n final)
+      const insertAt = Math.max(0, quill.getLength() - 1);
     
-      // cola o HTML no ponto de inserção (vira conteúdo normal)
+      // cola o HTML (deve ser UM <p> só, com <br> internos)
       quill.clipboard.dangerouslyPasteHTML(insertAt, html, 'user');
     
-      // transforma o(s) bloco(s) recém inseridos no formato "meditem" (DIV.med-item)
-      // Pega o tamanho inserido aproximado: usa uma âncora simples
-      const after = quill.getSelection(true);
-      const endIndex = after ? after.index : quill.getLength() - 1;
+      // aplica o bloco "meditem" apenas na linha onde começou a inserção
+      quill.formatLine(insertAt, 1, 'meditem', true, 'user');
     
-      // Aplica o formato de bloco do início ao fim inserido
-      quill.formatLine(insertAt, Math.max(1, endIndex - insertAt), 'meditem', true, 'user');
-    
-      // Garante uma linha vazia após o item (pra facilitar continuar)
+      // adiciona uma linha em branco depois pra continuar digitando fora do bloco
       quill.insertText(quill.getLength() - 1, "\n", 'user');
     
       selectEl.value = "0";
