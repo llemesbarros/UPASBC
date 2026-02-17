@@ -193,7 +193,7 @@
         medicamentos.forEach(function (element) {
           const option = document.createElement("option");
           option.text = element.nome;
-          option.value = '<p><strong>' + element.descricao + '</strong><br/>' + element.posologia + '</p>';
+          option.value = '<span><strong>' + element.descricao + '</strong><br/>' + element.posologia + '</span>';
           document.getElementById('medicamentos').add(option);
         });
       }
