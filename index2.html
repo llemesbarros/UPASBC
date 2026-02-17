@@ -131,37 +131,37 @@
 
     function addMedicamento(selectEl) {
       if (!quill) return;
-
+    
       const opt = selectEl.selectedOptions && selectEl.selectedOptions[0];
       if (!opt || opt.value === "0") return;
-
+    
       const desc = opt.dataset.desc || "";
       const pos  = opt.dataset.pos  || "";
       if (!desc) return;
-
-      // inserir no fim (antes do \n final)
+    
+      // posição no fim (antes do \n final do editor)
       let idx = Math.max(0, quill.getLength() - 1);
-
-      // descrição em negrito
-      quill.insertText(idx, desc, { bold: true }, 'user');
-      idx += desc.length;
-
-      // <br/> dentro do mesmo <li>
-      quill.insertEmbed(idx, 'break', true, 'user');
+    
+      // 1️⃣ cria uma nova linha já como item de lista
+      quill.insertText(idx, "\n", { list: "ordered" }, "user");
       idx += 1;
-
-      // posologia (normal)
+    
+      // 2️⃣ insere descrição em negrito (dentro do <li>)
+      quill.insertText(idx, desc, { bold: true }, "user");
+      idx += desc.length;
+    
+      // 3️⃣ insere <br> APENAS se houver posologia
       if (pos) {
-        quill.insertText(idx, pos, {}, 'user');
+        quill.insertEmbed(idx, "break", true, "user");
+        idx += 1;
+    
+        quill.insertText(idx, pos, {}, "user");
         idx += pos.length;
       }
-
-      // finaliza o item como lista ordenada (1 único <li>)
-      quill.insertText(idx, "\n", { list: "ordered" }, 'user');
-
-      // prepara cursor
-      quill.setSelection(quill.getLength() - 1, 0, 'silent');
-
+    
+      // posiciona cursor ao final do item
+      quill.setSelection(quill.getLength() - 1, 0, "silent");
+    
       selectEl.value = "0";
       selectEl.focus();
     }
