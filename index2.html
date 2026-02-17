@@ -27,11 +27,11 @@
 
     /* ====== Ordered list styling inside editor ====== */
     .ql-editor ol{
-      padding-left: 28px; /* recuo */
+      padding-left: 28px;
       margin: 0;
     }
     .ql-editor li{
-      margin: 0 0 12px 0;        /* espaçamento automático entre itens */
+      margin: 0 0 12px 0;
       padding-bottom: 6px;
       border-bottom: 1px dashed #bbb;
     }
@@ -39,7 +39,6 @@
       margin-bottom: 0;
       border-bottom: 0;
     }
-    /* número em negrito */
     .ql-editor li::marker{
       font-weight: bold;
     }
@@ -55,7 +54,6 @@
       @page { size: A4 portrait; margin: 10mm; }
       html, body { margin: 0; padding: 0; }
 
-      /* hide controls */
       .noprint, .ql-toolbar { display:none !important; }
 
       #pagenum{
@@ -67,26 +65,21 @@
         padding: 0;
       }
 
-      /* always break between vias */
       #page1 { break-after: page; page-break-after: always; }
 
-      /* editor: limit in mm to avoid pushing footer to next page */
       #texto{
         border: 0 !important;
-        height: 160mm;      /* ajuste fino: 155–165mm */
+        height: 160mm; /* ajuste fino: 155–165mm */
         overflow: hidden;
       }
 
-      /* slightly larger on print */
       .ql-editor{
         font-size: 17px;
         line-height: 1.45;
       }
 
-      /* avoid splitting footer */
       h5 { break-inside: avoid; page-break-inside: avoid; }
 
-      /* via labels */
       body.duasvias #page1 #pagenum span::after { content:"1ª VIA FARMÁCIA"; }
       body.duasvias #page2 #pagenum span::after { content:"2ª VIA PACIENTE"; }
       body:not(.duasvias) #page1 #pagenum span::after { content:"VIA ÚNICA"; }
@@ -132,31 +125,25 @@
       const pos  = opt.dataset.pos  || "";
       if (!desc) return;
 
-      // Sempre no fim (antes do \n final do editor)
-      const start = Math.max(0, quill.getLength() - 1);
-      let i = start;
+      // sempre no fim (antes do \n final do editor)
+      const base = Math.max(0, quill.getLength() - 1);
 
-      // Descrição em negrito
-      quill.insertText(i, desc, { bold: true }, 'user');
-      i += desc.length;
+      // 1) cria o <li> de forma “nativa”: texto + \n com atributo de lista
+      quill.insertText(base, desc, { bold: true }, "user");
+      quill.insertText(base + desc.length, "\n", { list: "ordered" }, "user");
 
-      // <br/> dentro do mesmo item (sem criar novo <li>)
+      // 2) agora o item já existe; inserir <br> e posologia ANTES do \n do <li>
+      //    (o \n do <li> está exatamente na posição base + desc.length)
+      let insertAt = base + desc.length;
+
       if (pos) {
-        quill.insertEmbed(i, 'break', true, 'user');
-        i += 1;
-
-        quill.insertText(i, pos, {}, 'user');
-        i += pos.length;
+        quill.insertEmbed(insertAt, "break", true, "user");
+        insertAt += 1;
+        quill.insertText(insertAt, pos, {}, "user");
       }
 
-      // Fecha a linha
-      quill.insertText(i, "\n", {}, 'user');
-
-      // Converte essa linha em item de lista ordenada
-      quill.formatLine(start, 1, 'list', 'ordered', 'user');
-
-      // Cursor no fim
-      quill.setSelection(quill.getLength() - 1, 0, 'silent');
+      // cursor no fim do documento
+      quill.setSelection(quill.getLength() - 1, 0, "silent");
 
       selectEl.value = "0";
       selectEl.focus();
@@ -167,7 +154,7 @@
       quill.setContents([]);
     }
 
-    window.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener("DOMContentLoaded", function () {
       // medicamentos: tenta localStorage, senão usa global do medicamentos.json, senão lista vazia
       let meds = [];
       try {
@@ -181,45 +168,37 @@
       }
 
       // Whitelist fonts for Quill
-      const Font = Quill.import('formats/font');
-      Font.whitelist = ['sans-serif', 'serif', 'monospace', 'roboto'];
+      const Font = Quill.import("formats/font");
+      Font.whitelist = ["sans-serif", "serif", "monospace", "roboto"];
       Quill.register(Font, true);
 
-      // Register <br/> embed so list items can have line breaks without creating new <li>
-      const Embed = Quill.import('blots/embed');
+      // Register <br/> embed (inline) — evita virar novo <li>
+      const Embed = Quill.import("blots/embed");
       class BreakBlot extends Embed {
-        static blotName = 'break';
-        static tagName = 'BR';
+        static blotName = "break";
+        static tagName = "BR";
       }
       Quill.register(BreakBlot, true);
 
-      // Init Quill with toolbar + Shift+Enter inserts <br/>
-      quill = new Quill('#texto', {
-        theme: 'snow',
-        modules: {
-          toolbar: '#toolbar',
-          keyboard: {
-            bindings: {
-              linebreak: {
-                key: 13,
-                shiftKey: true,
-                handler: function(range) {
-                  this.quill.insertEmbed(range.index, 'break', true, 'user');
-                  this.quill.setSelection(range.index + 1, 0, 'silent');
-                  return false;
-                }
-              }
-            }
-          }
-        }
+      // Init Quill (toolbar)
+      quill = new Quill("#texto", {
+        theme: "snow",
+        modules: { toolbar: "#toolbar" }
+      });
+
+      // Shift+Enter => <br/> (override do comportamento padrão)
+      quill.keyboard.addBinding({ key: 13, shiftKey: true }, function(range) {
+        this.quill.insertEmbed(range.index, "break", true, "user");
+        this.quill.setSelection(range.index + 1, 0, "silent");
+        return false;
       });
 
       // Date
-      const data = document.getElementById('data');
+      const data = document.getElementById("data");
       data.value = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
 
-      // Populate medicamentos dropdown (usa dataset ao invés de HTML)
-      const sel = document.getElementById('medicamentos');
+      // Populate medicamentos dropdown (dataset)
+      const sel = document.getElementById("medicamentos");
       if (Array.isArray(meds)) {
         meds.forEach(function (element) {
           const option = document.createElement("option");
@@ -233,67 +212,67 @@
 
       // URL params
       const urlParams = new URLSearchParams(window.location.search);
-      document.getElementById('nome_paciente').value = urlParams.get('nome') || '';
-      document.getElementById('id_paciente').value = urlParams.get('id') || '';
+      document.getElementById("nome_paciente").value = urlParams.get("nome") || "";
+      document.getElementById("id_paciente").value = urlParams.get("id") || "";
 
       // Unidade
       const unidade = {
-        nome: urlParams.get('unidade'),
-        endereco: 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande'
+        nome: urlParams.get("unidade"),
+        endereco: "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande"
       };
 
-      switch (urlParams.get('unidade')) {
+      switch (urlParams.get("unidade")) {
         case "UPA RIACHO GRANDE":
-          unidade.endereco = 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande';
+          unidade.endereco = "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande";
           break;
         case "UPA RUDGE RAMOS":
-          unidade.endereco = 'Rua Angela Tomé, n 256 - Bairro Rudge Ramos';
+          unidade.endereco = "Rua Angela Tomé, n 256 - Bairro Rudge Ramos";
           break;
         case "UPA BAETA NEVES":
-          unidade.endereco = 'R. dos Vianas, 933 - Baeta Neves';
+          unidade.endereco = "R. dos Vianas, 933 - Baeta Neves";
           break;
         case "UPA ALVES DIAS/ASSUNÇÃO":
-          unidade.endereco = 'Av. Humberto de Alencar Castelo Branco, 4220 - Alves Dias';
+          unidade.endereco = "Av. Humberto de Alcântara Castelo Branco, 4220 - Alves Dias";
           break;
         case "UPA UPA DEMARCHI/BATISTINI":
-          unidade.endereco = 'R. Valdomiro Luís, 303 - Demarchi';
+          unidade.endereco = "R. Valdomiro Luís, 303 - Demarchi";
           break;
         case "UPA PAULICEIA/TABOAO":
-          unidade.endereco = 'R. Pedro de Tolêdo, 326 - Paulicéia';
+          unidade.endereco = "R. Pedro de Tolêdo, 326 - Paulicéia";
           break;
         case "UPA SAO PEDRO":
-          unidade.endereco = 'Av. Dom Pedro de Alcântara, 273 - Montanhão';
+          unidade.endereco = "Av. Dom Pedro de Alcântara, 273 - Montanhão";
           break;
         case "UPA SILVINA":
-          unidade.endereco = 'Av. Dr. José Fornari, 509 - Ferrazópolis';
+          unidade.endereco = "Av. Dr. José Fornari, 509 - Ferrazópolis";
           break;
         case "UPA UNIÃO/ALVARENGA":
-          unidade.endereco = 'Estr. dos Alvarengas, 5779 - Alvarenga';
+          unidade.endereco = "Estr. dos Alvarengas, 5779 - Alvarenga";
           break;
         default:
-          unidade.nome = 'UPA RIACHO GRANDE';
-          console.log('Unidade não fornecida');
+          unidade.nome = "UPA RIACHO GRANDE";
+          console.log("Unidade não fornecida");
       }
 
-      document.getElementById('unidade_nome').innerHTML = unidade.nome || '';
-      document.getElementById('unidade_endereco').innerHTML = unidade.endereco || '';
+      document.getElementById("unidade_nome").innerHTML = unidade.nome || "";
+      document.getElementById("unidade_endereco").innerHTML = unidade.endereco || "";
     });
 
     window.onbeforeprint = function () {
-      if (document.getElementById('segundavia').checked) {
-        const clone = document.getElementById('page1').cloneNode(true);
-        clone.id = 'page2';
-        clone.classList.add('printonly');
-        document.body.classList.add('duasvias');
+      if (document.getElementById("segundavia").checked) {
+        const clone = document.getElementById("page1").cloneNode(true);
+        clone.id = "page2";
+        clone.classList.add("printonly");
+        document.body.classList.add("duasvias");
         document.body.appendChild(clone);
       }
-    }
+    };
 
     window.onafterprint = function () {
-      const apagar = document.getElementById('page2');
+      const apagar = document.getElementById("page2");
       if (apagar) apagar.remove();
-      document.body.classList.remove('duasvias');
-    }
+      document.body.classList.remove("duasvias");
+    };
   </script>
 
   <title>RECEITUÁRIO</title>
