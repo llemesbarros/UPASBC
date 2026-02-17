@@ -78,9 +78,6 @@
 				}
 				document.getElementById('unidade_nome').innerHTML = unidade.nome;
 				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
-				console.log(document.getElementsByClassName('ql-editor')[0]);
-				var content_editor = document.getElementsByClassName('ql-editor')[0];
-				console.log(content_editor);
 			}
 			window.onbeforeprint = function(){
 				if(document.getElementById('segundavia').checked){
@@ -149,4 +146,5 @@
 			</h5>
 		</div>
 	</body>
+	<script>var content_editor = document.getElementsByClassName('ql-editor')[0];</script>
 </html>
