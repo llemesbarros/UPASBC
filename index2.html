@@ -44,13 +44,6 @@
       font-weight: bold;
     }
 
-    /* Deixa o <br> embed visualmente como quebra real */
-    .ql-editor br{
-      display: block;
-      content: "";
-      margin-top: 2px;
-    }
-
     /* Screen-only */
     @media screen {
       .printonly{display:none;}
@@ -131,37 +124,40 @@
 
     function addMedicamento(selectEl) {
       if (!quill) return;
-    
+
       const opt = selectEl.selectedOptions && selectEl.selectedOptions[0];
       if (!opt || opt.value === "0") return;
-    
+
       const desc = opt.dataset.desc || "";
       const pos  = opt.dataset.pos  || "";
       if (!desc) return;
-    
-      // posição no fim (antes do \n final do editor)
-      let idx = Math.max(0, quill.getLength() - 1);
-    
-      // 1️⃣ cria uma nova linha já como item de lista
-      quill.insertText(idx, "\n", { list: "ordered" }, "user");
-      idx += 1;
-    
-      // 2️⃣ insere descrição em negrito (dentro do <li>)
-      quill.insertText(idx, desc, { bold: true }, "user");
-      idx += desc.length;
-    
-      // 3️⃣ insere <br> APENAS se houver posologia
+
+      // Sempre no fim (antes do \n final do editor)
+      const start = Math.max(0, quill.getLength() - 1);
+      let i = start;
+
+      // Descrição em negrito
+      quill.insertText(i, desc, { bold: true }, 'user');
+      i += desc.length;
+
+      // <br/> dentro do mesmo item (sem criar novo <li>)
       if (pos) {
-        quill.insertEmbed(idx, "break", true, "user");
-        idx += 1;
-    
-        quill.insertText(idx, pos, {}, "user");
-        idx += pos.length;
+        quill.insertEmbed(i, 'break', true, 'user');
+        i += 1;
+
+        quill.insertText(i, pos, {}, 'user');
+        i += pos.length;
       }
-    
-      // posiciona cursor ao final do item
-      quill.setSelection(quill.getLength() - 1, 0, "silent");
-    
+
+      // Fecha a linha
+      quill.insertText(i, "\n", {}, 'user');
+
+      // Converte essa linha em item de lista ordenada
+      quill.formatLine(start, 1, 'list', 'ordered', 'user');
+
+      // Cursor no fim
+      quill.setSelection(quill.getLength() - 1, 0, 'silent');
+
       selectEl.value = "0";
       selectEl.focus();
     }
