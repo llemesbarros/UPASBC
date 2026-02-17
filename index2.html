@@ -20,14 +20,40 @@
 			#pagenum{display:none}
 
 			@media print {
-				@page { size: A4 portrait; }
-				.noprint, #toolbar {display:none}
-				#texto{border:0;}
-				body.duasvias #pagenum{font-size:14px; display:inherit;}
-				#page1 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"1ª VIA FARMÁCIA"; }
-				#page2 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"2ª VIA PACIENTE"; }
-				#page1, #page2 {page-break-inside: avoid;}
+			  /* controla a área útil do A4 */
+			  @page { size: A4 portrait; margin: 10mm; }
+			
+			  /* remove margem padrão do browser */
+			  html, body { margin: 0; padding: 0; }
+			
+			  /* some com controles */
+			  .noprint, .ql-toolbar { display:none !important; }
+			
+			  /* IMPORTANTE: não force "avoid" no container inteiro */
+			  /* remova isso do seu CSS atual:
+			     #page1, #page2 {page-break-inside: avoid;}
+			  */
+			
+			  /* sempre quebra entre as vias */
+			  #page1 { break-after: page; page-break-after: always; }
+			
+			  /* editor: limite em unidade de impressão (mm) */
+			  #texto {
+			    border: 0 !important;
+			    height: 160mm;          /* ajuste fino aqui (ex.: 155–165mm) */
+			    overflow: hidden;       /* impede “vazar” e empurrar rodapé */
+			  }
+			
+			  /* evita quebrar o rodapé sozinho */
+			  h5 { break-inside: avoid; page-break-inside: avoid; }
+			
+			  /* suas regras de via */
+			  body.duasvias #pagenum{font-size:14px; display:inherit;}
+			  #page1 #pagenum span::after{ display:block; content:"1ª VIA FARMÁCIA"; text-align:right; }
+			  #page2 #pagenum span::after{ display:block; content:"2ª VIA PACIENTE"; text-align:right; }
 			}
+
+			
 			@media screen {
 				.printonly{display:none}
 			}
