@@ -33,7 +33,7 @@
 				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
 				const quill = new Quill('#texto', {theme: 'snow'});
 				var data = document.getElementById('data');
-				var texto = document.getElementById('ql-editor');
+				var texto = document.getElementsByClassName('ql-editor')[0];
 				data.value = new Date().toLocaleString("sv-SE",{dateStyle: "short", timeZone: "America/Sao_Paulo"});
 				medicamentos.forEach(function(element,index,array){
 					var option = document.createElement("option");
