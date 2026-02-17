@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--Versão 2.0-->
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -25,7 +26,7 @@
       line-height: 1.5;
     }
     
-    /* Garante que o BR seja visível dentro do editor */
+    /* Garante que a quebra de linha (Shift+Enter) seja visível e ocupe espaço */
     .ql-editor br { display: inline; }
 
     /* ====== Ordered list styling inside editor ====== */
@@ -118,7 +119,6 @@
   <script>
     let quill = null;
 
-    // === FUNÇÃO CORRIGIDA ===
     function addMedicamento(selectEl) {
       if (!quill) return;
 
@@ -133,23 +133,21 @@
       const index = Math.max(0, quill.getLength() - 1);
 
       // 1. Insere o NOME (Negrito)
-      // Nota: Não inserimos o \n aqui, nem a formatação de lista ainda.
       quill.insertText(index, desc, { bold: true }, 'user');
 
       // 2. Se tiver posologia, insere a quebra + texto (sem negrito)
       let nextIndex = index + desc.length;
       if (pos) {
-         quill.insertEmbed(nextIndex, 'break', true, 'user');
+         quill.insertEmbed(nextIndex, 'softbreak', true, 'user');
          nextIndex++;
          quill.insertText(nextIndex, pos, { bold: false }, 'user'); 
          nextIndex += pos.length;
       }
 
-      // 3. Insere a quebra de linha FINAL "limpa"
+      // 3. Insere a quebra de linha FINAL "limpa" para fechar o item
       quill.insertText(nextIndex, "\n", {}, 'user');
 
-      // 4. AGORA aplica a formatação de lista na linha inteira.
-      // Isso evita o bug do <br> fantasma no início do LI.
+      // 4. Formata a linha recém criada como Lista Ordenada
       quill.formatLine(nextIndex, 1, 'list', 'ordered', 'user');
 
       // 5. Ajusta cursor e limpa select
@@ -164,7 +162,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", function () {
-      // medicamentos: tenta localStorage, senão usa global do medicamentos.json, senão lista vazia
+      // carregar medicamentos
       let meds = [];
       try {
         if (window.localStorage.medicamentos != undefined) {
@@ -176,35 +174,38 @@
         meds = Array.isArray(window.medicamentos) ? window.medicamentos : [];
       }
 
-      // Whitelist fonts for Quill
+      // Whitelist fonts
       const Font = Quill.import("formats/font");
       Font.whitelist = ["sans-serif", "serif", "monospace", "roboto"];
       Quill.register(Font, true);
 
-      // Register <br/> embed (inline)
+      // 1. REGISTRA O BLOT CUSTOMIZADO PARA <BR>
       const Embed = Quill.import("blots/embed");
-      class BreakBlot extends Embed {
-        static blotName = "break";
-        static tagName = "br";
+      class SoftBreak extends Embed {
+        static blotName = "softbreak"; // Nome interno único
+        static tagName = "br";         // Tag HTML real
       }
-      Quill.register(BreakBlot, true);
+      Quill.register(SoftBreak);
 
-      // Init Quill (toolbar)
+      // 2. INICIA O QUILL
       quill = new Quill("#texto", {
         theme: "snow",
         modules: { toolbar: "#toolbar" }
       });
 
-      // Shift+Enter => <br/> (Prioridade Alta)
+      // 3. SOBRESCREVE SHIFT+ENTER COM PRIORIDADE MÁXIMA
       const keyboard = quill.getModule('keyboard');
       keyboard.addBinding({ 
-          key: 13, 
+          key: 'Enter',     // string 'Enter' é crucial para Quill 2.0
           shiftKey: true 
       }, {
-          priority: 1000 
+          priority: 9999    // Garante que roda antes da lista padrão
       }, function(range, context) {
-          this.quill.insertEmbed(range.index, "break", true, "user");
+          // Insere o <br> customizado
+          this.quill.insertEmbed(range.index, "softbreak", true, "user");
+          // Move o cursor para frente dele
           this.quill.setSelection(range.index + 1, 0, "silent");
+          // Retorna false para parar a propagação (não criar nova LI)
           return false; 
       });
 
@@ -212,7 +213,7 @@
       const data = document.getElementById("data");
       data.value = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
 
-      // Populate medicamentos dropdown (dataset)
+      // Populate select
       const sel = document.getElementById("medicamentos");
       if (Array.isArray(meds)) {
         meds.forEach(function (element) {
@@ -225,48 +226,27 @@
         });
       }
 
-      // URL params
+      // URL params e Unidade
       const urlParams = new URLSearchParams(window.location.search);
       document.getElementById("nome_paciente").value = urlParams.get("nome") || "";
       document.getElementById("id_paciente").value = urlParams.get("id") || "";
 
-      // Unidade
       const unidade = {
         nome: urlParams.get("unidade"),
         endereco: "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande"
       };
 
       switch (urlParams.get("unidade")) {
-        case "UPA RIACHO GRANDE":
-          unidade.endereco = "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande";
-          break;
-        case "UPA RUDGE RAMOS":
-          unidade.endereco = "Rua Angela Tomé, n 256 - Bairro Rudge Ramos";
-          break;
-        case "UPA BAETA NEVES":
-          unidade.endereco = "R. dos Vianas, 933 - Baeta Neves";
-          break;
-        case "UPA ALVES DIAS/ASSUNÇÃO":
-          unidade.endereco = "Av. Humberto de Alcântara Castelo Branco, 4220 - Alves Dias";
-          break;
-        case "UPA UPA DEMARCHI/BATISTINI":
-          unidade.endereco = "R. Valdomiro Luís, 303 - Demarchi";
-          break;
-        case "UPA PAULICEIA/TABOAO":
-          unidade.endereco = "R. Pedro de Tolêdo, 326 - Paulicéia";
-          break;
-        case "UPA SAO PEDRO":
-          unidade.endereco = "Av. Dom Pedro de Alcântara, 273 - Montanhão";
-          break;
-        case "UPA SILVINA":
-          unidade.endereco = "Av. Dr. José Fornari, 509 - Ferrazópolis";
-          break;
-        case "UPA UNIÃO/ALVARENGA":
-          unidade.endereco = "Estr. dos Alvarengas, 5779 - Alvarenga";
-          break;
-        default:
-          unidade.nome = "UPA RIACHO GRANDE";
-          console.log("Unidade não fornecida");
+        case "UPA RIACHO GRANDE": unidade.endereco = "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande"; break;
+        case "UPA RUDGE RAMOS": unidade.endereco = "Rua Angela Tomé, n 256 - Bairro Rudge Ramos"; break;
+        case "UPA BAETA NEVES": unidade.endereco = "R. dos Vianas, 933 - Baeta Neves"; break;
+        case "UPA ALVES DIAS/ASSUNÇÃO": unidade.endereco = "Av. Humberto de Alcântara Castelo Branco, 4220 - Alves Dias"; break;
+        case "UPA UPA DEMARCHI/BATISTINI": unidade.endereco = "R. Valdomiro Luís, 303 - Demarchi"; break;
+        case "UPA PAULICEIA/TABOAO": unidade.endereco = "R. Pedro de Tolêdo, 326 - Paulicéia"; break;
+        case "UPA SAO PEDRO": unidade.endereco = "Av. Dom Pedro de Alcântara, 273 - Montanhão"; break;
+        case "UPA SILVINA": unidade.endereco = "Av. Dr. José Fornari, 509 - Ferrazópolis"; break;
+        case "UPA UNIÃO/ALVARENGA": unidade.endereco = "Estr. dos Alvarengas, 5779 - Alvarenga"; break;
+        default: unidade.nome = "UPA RIACHO GRANDE"; console.log("Unidade não fornecida");
       }
 
       document.getElementById("unidade_nome").innerHTML = unidade.nome || "";
@@ -337,7 +317,6 @@
           <option value="monospace">Mono</option>
           <option value="roboto">Roboto</option>
         </select>
-
         <select class="ql-size">
           <option value="small"></option>
           <option selected></option>
@@ -345,18 +324,15 @@
           <option value="huge"></option>
         </select>
       </span>
-
       <span class="ql-formats">
         <button class="ql-bold"></button>
         <button class="ql-italic"></button>
         <button class="ql-underline"></button>
       </span>
-
       <span class="ql-formats">
         <button class="ql-list" value="ordered"></button>
         <button class="ql-list" value="bullet"></button>
       </span>
-
       <span class="ql-formats">
         <button class="ql-clean"></button>
       </span>
