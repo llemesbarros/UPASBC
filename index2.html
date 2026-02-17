@@ -18,6 +18,7 @@
 			#medicamentos,button{padding:5px;}
 			#page1{page-break-after: always;}
 			#pagenum{display:none}
+			.med-item{margin-bottom:15px;}
 
 			@media print {
 			  /* controla a área útil do A4 */
@@ -28,12 +29,7 @@
 			
 			  /* some com controles */
 			  .noprint, .ql-toolbar { display:none !important; }
-			
-			  /* IMPORTANTE: não force "avoid" no container inteiro */
-			  /* remova isso do seu CSS atual:
-			     #page1, #page2 {page-break-inside: avoid;}
-			  */
-			
+						
 			  /* sempre quebra entre as vias */
 			  #page1 { break-after: page; page-break-after: always; }
 			
@@ -136,7 +132,7 @@
 				medicamentos.forEach(function (element) {
 					const option = document.createElement("option");
 					option.text = element.nome;
-					option.value = '<p><strong>' + element.descricao + '</strong><br/>' + element.posologia + '</p>';
+					option.value = '<h3>' + element.descricao + '</h3><p class="med-item">' + element.posologia + '</p>';
 					document.getElementById('medicamentos').add(option);
 				});
 
