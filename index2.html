@@ -32,6 +32,7 @@
 			window.onload = function(){
 				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
 				const quill = new Quill('#texto', {theme: 'snow'});
+				const content_editor = document.getElementsByClassName('ql-editor')[0];
 				var data = document.getElementById('data');
 				data.value = new Date().toLocaleString("sv-SE",{dateStyle: "short", timeZone: "America/Sao_Paulo"});
 				medicamentos.forEach(function(element,index,array){
@@ -146,5 +147,4 @@
 			</h5>
 		</div>
 	</body>
-	<script>var content_editor = document.getElementsByClassName('ql-editor')[0];</script>
 </html>
