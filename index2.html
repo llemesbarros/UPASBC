@@ -5,17 +5,12 @@
   <link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAJ6TrAFy+8QCC0vgA7+/vAC6n7ACE0/gAS2RuAKbU5QDAwMAAv+3+ACek6gApoeYAAAAAAAAAAAAAAAAARERERERERABEREREREREAEREREREREQAREREeIRERABJmZSohUREAERERKolVEQAREREozUVRABJmZRDNlFUAEREREQzZRUAREREREM2W1BJmZmZRDNlxUREREREQzZVREREREREMzVJmZmZmURDM0REREREREQzRERERERERAMAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA"
         rel="icon" type="image/x-icon" />
 
-  <title>RECEITUÁRIO</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
-
   <style>
     body{font-family:sans-serif;}
     header img{margin-right:10px;}
     th{padding-top:10px;}
-    .paciente td{width:100%; border-bottom:1px solid #000;} /* Ajustei borda pra aparecer */
-    td input[type=text]{width:100%; height:28px; text-transform:uppercase; border-width:0 0 1px 0; font:inherit; border-color: #000;}
+    .paciente td{width:100%; border-bottom:1px}
+    td input[type=text]{width:100%; height:28px; text-transform:uppercase; border-width:0 0 1px 0; font:inherit}
     #data{height:28px; border-width:0 0 1px 0; text-align:center; font:inherit}
 
     /* Quill editor height (screen) */
@@ -24,11 +19,11 @@
     #medicamentos,button{padding:5px;}
     #page1{page-break-after: always;}
 
-    /* ====== QUILL CONTENT: bigger font ====== */
+    /* ====== QUILL CONTENT: bigger font + counter reset ====== */
     .ql-editor{
+      counter-reset: med-counter;
       font-size: 16px;
       line-height: 1.5;
-      counter-reset: med-counter; /* numbering reset */
     }
 
     /* linha 1 do item (título) */
@@ -38,8 +33,6 @@
       position: relative;
       margin: 0;
     }
-
-    /* número automático só no título */
     .med-title::before{
       content: counter(med-counter) ".";
       position: absolute;
@@ -50,13 +43,11 @@
 
     /* linha 2 do item (posologia) */
     .med-pos{
-      padding-left: 28px;           /* alinha com o texto do título */
-      margin: 2px 0 12px 0;        /* espaçamento entre itens */
+      padding-left: 28px;
+      margin: 2px 0 12px 0;
       padding-bottom: 6px;
       border-bottom: 1px dashed #bbb;
     }
-
-    /* evita “borda sobrando” se for o último */
     .med-pos:last-child{
       margin-bottom: 0;
       border-bottom: 0;
@@ -78,7 +69,7 @@
 
       #pagenum{
         display:block !important;
-        position: relative;      
+        position: relative;
         font-size: 14px;
         text-align: right;
         margin: 0 0 4mm 0;
@@ -91,26 +82,25 @@
       /* editor: limit in mm to avoid pushing footer to next page */
       #texto{
         border: 0 !important;
-        height: 160mm;      /* ajuste fino: 155–165mm */
+        height: 160mm;
         overflow: hidden;
       }
 
-      /* slightly larger on print */
       .ql-editor{
         font-size: 17px;
         line-height: 1.45;
       }
 
-      /* avoid splitting footer */
       h5 { break-inside: avoid; page-break-inside: avoid; }
 
-      /* via labels */
       body.duasvias #page1 #pagenum span::after { content:"1ª VIA FARMÁCIA"; }
       body.duasvias #page2 #pagenum span::after { content:"2ª VIA PACIENTE"; }
       body:not(.duasvias) #page1 #pagenum span::after { content:"VIA ÚNICA"; }
     }
 
-    /* Font configs */
+    /* Fonts for Quill (Font picker) */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
     .ql-font-sans-serif { font-family: sans-serif; }
     .ql-font-serif { font-family: serif; }
     .ql-font-monospace { font-family: monospace; }
@@ -131,15 +121,16 @@
 
   <script src="medicamentos.json"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 
   <script>
     let quill = null;
 
-    // Função para inserir medicamento formatado
     function addMedicamento(selectEl) {
+      if (!quill) return;
+
       const html = selectEl.value;
       if (!html || html === "0") return;
-      if (!quill) return; // Segurança extra
 
       // inserir no fim (antes do \n final)
       const start = Math.max(0, quill.getLength() - 1);
@@ -163,7 +154,7 @@
         quill.formatLine(idx1, 1, 'medpos', true, 'user');
       }
 
-      // garante uma linha em branco após o item
+      // linha em branco após o item
       quill.insertText(quill.getLength() - 1, "\n", 'user');
 
       selectEl.value = "0";
@@ -176,13 +167,26 @@
     }
 
     window.addEventListener('DOMContentLoaded', function () {
-      
-      // === Configuração de Fontes e Blots do Quill ===
+      // fallback seguro caso medicamentos não exista
+      let meds = [];
+      try {
+        if (window.localStorage.medicamentos != undefined) {
+          meds = JSON.parse(localStorage.medicamentos);
+        } else if (Array.isArray(window.medicamentos)) {
+          meds = window.medicamentos;
+        }
+      } catch(e) {
+        meds = Array.isArray(window.medicamentos) ? window.medicamentos : [];
+      }
+
+      // Whitelist fonts for Quill
       const Font = Quill.import('formats/font');
       Font.whitelist = ['sans-serif', 'serif', 'monospace', 'roboto'];
       Quill.register(Font, true);
 
+      // Blots editáveis para título e posologia
       const Block = Quill.import('blots/block');
+
       class MedTitleBlot extends Block {
         static blotName = 'medtitle';
         static tagName = 'DIV';
@@ -193,59 +197,34 @@
         static tagName = 'DIV';
         static className = 'med-pos';
       }
+
       Quill.register(MedTitleBlot, true);
       Quill.register(MedPosBlot, true);
 
-      // ============================================================
-      // A CORREÇÃO PRINCIPAL ESTÁ AQUI: INICIALIZAR O QUILL
-      // ============================================================
+      // >>>>>>> FALTAVA ISTO: inicializar o Quill <<<<<<<
       quill = new Quill('#texto', {
         theme: 'snow',
-        modules: {
-          toolbar: '#toolbar' // Conecta a barra de ferramentas customizada
-        }
+        modules: { toolbar: '#toolbar' }
       });
-
-      // === Lógica de Dados e Layout ===
-      
-      // Load medicamentos from localStorage if present
-      if (window.localStorage.medicamentos != undefined) {
-        // Se existir no localStorage, usa ele
-        var listaMedicamentos = JSON.parse(localStorage.medicamentos);
-      } else if (typeof medicamentos !== 'undefined') {
-        // Se existir no arquivo .json, usa ele
-        var listaMedicamentos = medicamentos;
-      } else {
-        // Fallback vazio
-        var listaMedicamentos = [];
-      }
 
       // Date
       const data = document.getElementById('data');
-      if(data) {
-        // Ajuste para formato YYYY-MM-DD que o input type=date exige
-        const hoje = new Date();
-        const yyyy = hoje.getFullYear();
-        const mm = String(hoje.getMonth() + 1).padStart(2, '0');
-        const dd = String(hoje.getDate()).padStart(2, '0');
-        data.value = `${yyyy}-${mm}-${dd}`;
-      }
+      data.value = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
 
       // Populate medicamentos dropdown
-      if (Array.isArray(listaMedicamentos)) {
-        listaMedicamentos.forEach(function (element) {
-          const option = document.createElement("option");
-          option.text = element.nome;
-          // Cria o HTML que será inserido no editor
-          option.value = '<p><strong>' + element.descricao + '</strong></p><p>' + element.posologia + '</p>';
-          document.getElementById('medicamentos').add(option);
-        });
-      }
+      const sel = document.getElementById('medicamentos');
+      meds.forEach(function (element) {
+        const option = document.createElement("option");
+        option.text = element.nome;
+        // 2 blocos: título (linha 1) + posologia (linha 2)
+        option.value = '<p><strong>' + element.descricao + '</strong></p><p>' + element.posologia + '</p>';
+        sel.add(option);
+      });
 
       // URL params
       const urlParams = new URLSearchParams(window.location.search);
-      if(document.getElementById('nome_paciente')) document.getElementById('nome_paciente').value = urlParams.get('nome') || '';
-      if(document.getElementById('id_paciente')) document.getElementById('id_paciente').value = urlParams.get('id') || '';
+      document.getElementById('nome_paciente').value = urlParams.get('nome') || '';
+      document.getElementById('id_paciente').value = urlParams.get('id') || '';
 
       // Unidade
       const unidade = {
@@ -254,42 +233,24 @@
       };
 
       switch (urlParams.get('unidade')) {
-        case "UPA RIACHO GRANDE":
-          unidade.endereco = 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande';
-          break;
-        case "UPA RUDGE RAMOS":
-          unidade.endereco = 'Rua Angela Tomé, n 256 - Bairro Rudge Ramos';
-          break;
-        case "UPA BAETA NEVES":
-          unidade.endereco = 'R. dos Vianas, 933 - Baeta Neves';
-          break;
-        case "UPA ALVES DIAS/ASSUNÇÃO":
-          unidade.endereco = 'Av. Humberto de Alencar Castelo Branco, 4220 - Alves Dias';
-          break;
-        case "UPA UPA DEMARCHI/BATISTINI":
-          unidade.endereco = 'R. Valdomiro Luís, 303 - Demarchi';
-          break;
-        case "UPA PAULICEIA/TABOAO":
-          unidade.endereco = 'R. Pedro de Tolêdo, 326 - Paulicéia';
-          break;
-        case "UPA SAO PEDRO":
-          unidade.endereco = 'Av. Dom Pedro de Alcântara, 273 - Montanhão';
-          break;
-        case "UPA SILVINA":
-          unidade.endereco = 'Av. Dr. José Fornari, 509 - Ferrazópolis';
-          break;
-        case "UPA UNIÃO/ALVARENGA":
-          unidade.endereco = 'Estr. dos Alvarengas, 5779 - Alvarenga';
-          break;
+        case "UPA RIACHO GRANDE": unidade.endereco = 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande'; break;
+        case "UPA RUDGE RAMOS": unidade.endereco = 'Rua Angela Tomé, n 256 - Bairro Rudge Ramos'; break;
+        case "UPA BAETA NEVES": unidade.endereco = 'R. dos Vianas, 933 - Baeta Neves'; break;
+        case "UPA ALVES DIAS/ASSUNÇÃO": unidade.endereco = 'Av. Humberto de Alencar Castelo Branco, 4220 - Alves Dias'; break;
+        case "UPA UPA DEMARCHI/BATISTINI": unidade.endereco = 'R. Valdomiro Luís, 303 - Demarchi'; break;
+        case "UPA PAULICEIA/TABOAO": unidade.endereco = 'R. Pedro de Tolêdo, 326 - Paulicéia'; break;
+        case "UPA SAO PEDRO": unidade.endereco = 'Av. Dom Pedro de Alcântara, 273 - Montanhão'; break;
+        case "UPA SILVINA": unidade.endereco = 'Av. Dr. José Fornari, 509 - Ferrazópolis'; break;
+        case "UPA UNIÃO/ALVARENGA": unidade.endereco = 'Estr. dos Alvarengas, 5779 - Alvarenga'; break;
         default:
           unidade.nome = 'UPA RIACHO GRANDE';
+          console.log('Unidade não fornecida');
       }
 
       document.getElementById('unidade_nome').innerHTML = unidade.nome || '';
       document.getElementById('unidade_endereco').innerHTML = unidade.endereco || '';
     });
 
-    // Lógica de Impressão (2 vias)
     window.onbeforeprint = function () {
       if (document.getElementById('segundavia').checked) {
         const clone = document.getElementById('page1').cloneNode(true);
@@ -306,6 +267,8 @@
       document.body.classList.remove('duasvias');
     }
   </script>
+
+  <title>RECEITUÁRIO</title>
 </head>
 
 <body>
@@ -313,7 +276,7 @@
     <div id="pagenum" class="printonly"><span></span></div>
 
     <header>
-      <img src="logo-sbc.jpg" height="100" align="left" alt="Logo" />
+      <img src="logo-sbc.jpg" height="100" align="left" />
       <p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
       <h2>RECEITUÁRIO</h2>
       <p>SECRETARIA DE SAÚDE</p>
@@ -321,13 +284,13 @@
 
     <br/>
 
-    <table class="paciente" style="width: 100%;">
+    <table class="paciente">
       <tr>
-        <th style="width: 60px; text-align: left;">NOME:</th>
+        <th>NOME:</th>
         <td><input type="text" id="nome_paciente" /></td>
       </tr>
       <tr>
-        <th style="width: 60px; text-align: left;">HYGIA:</th>
+        <th>HYGIA:</th>
         <td><input type="text" id="id_paciente" /></td>
       </tr>
     </table>
@@ -379,15 +342,19 @@
 
     <div id="texto"></div>
 
-    <table style="width:100%; margin-top: 20px;">
+    <table>
+      <tr style="width:100%">
+        <th>DATA:</th>
+        <td style="width:300px"><input type="date" id="data" /></td>
+        <td><input type="text" size="50" /></td>
+      </tr>
       <tr>
-        <th style="width: 50px;">DATA:</th>
-        <td style="width:200px"><input type="date" id="data" /></td>
-        <td></td> <td style="width: 300px; border-top: 1px solid #000; text-align: center;">CARIMBO E ASSINATURA</td>
+        <td colspan="2"></td>
+        <td align="center">CARIMBO E ASSINATURA</td>
       </tr>
     </table>
 
-    <h5 align="center" style="margin-top: 30px;">
+    <h5 align="center">
       <span id="unidade_nome"></span> <br/>
       <span id="unidade_endereco"></span> <br/>
       São Bernardo do Campo - SP <br/>
