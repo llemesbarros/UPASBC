@@ -1,5 +1,5 @@
-<!DOCTYPE html>
 <!--Versão 2.0-->
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
@@ -26,7 +26,7 @@
       line-height: 1.5;
     }
     
-    /* Garante que a quebra de linha (Shift+Enter) seja visível e ocupe espaço */
+    /* Garante que o SoftBreak (Shift+Enter) seja visível e ocupe espaço */
     .ql-editor br { display: inline; }
 
     /* ====== Ordered list styling inside editor ====== */
@@ -119,6 +119,7 @@
   <script>
     let quill = null;
 
+    // === FUNÇÃO ADD MEDICAMENTO (Mantida a versão aprovada) ===
     function addMedicamento(selectEl) {
       if (!quill) return;
 
@@ -179,34 +180,38 @@
       Font.whitelist = ["sans-serif", "serif", "monospace", "roboto"];
       Quill.register(Font, true);
 
-      // 1. REGISTRA O BLOT CUSTOMIZADO PARA <BR>
+      // 1. REGISTRA O BLOT CUSTOMIZADO PARA <BR> (SoftBreak)
       const Embed = Quill.import("blots/embed");
       class SoftBreak extends Embed {
-        static blotName = "softbreak"; // Nome interno único
-        static tagName = "br";         // Tag HTML real
+        static blotName = "softbreak"; 
+        static tagName = "br";         
       }
       Quill.register(SoftBreak);
 
-      // 2. INICIA O QUILL
+      // 2. INICIA O QUILL COM A CONFIGURAÇÃO DE TECLADO INJETADA
+      // Colocar o 'bindings' aqui garante que ele seja carregado corretamente na inicialização
       quill = new Quill("#texto", {
         theme: "snow",
-        modules: { toolbar: "#toolbar" }
-      });
-
-      // 3. SOBRESCREVE SHIFT+ENTER COM PRIORIDADE MÁXIMA
-      const keyboard = quill.getModule('keyboard');
-      keyboard.addBinding({ 
-          key: 'Enter',     // string 'Enter' é crucial para Quill 2.0
-          shiftKey: true 
-      }, {
-          priority: 9999    // Garante que roda antes da lista padrão
-      }, function(range, context) {
-          // Insere o <br> customizado
-          this.quill.insertEmbed(range.index, "softbreak", true, "user");
-          // Move o cursor para frente dele
-          this.quill.setSelection(range.index + 1, 0, "silent");
-          // Retorna false para parar a propagação (não criar nova LI)
-          return false; 
+        modules: { 
+          toolbar: "#toolbar",
+          keyboard: {
+            bindings: {
+              // Nome arbitrário para o binding
+              'softBreak': {
+                key: 'Enter',
+                shiftKey: true,
+                handler: function(range, context) {
+                  // Insere o <br> customizado
+                  this.quill.insertEmbed(range.index, 'softbreak', true, 'user');
+                  // Move o cursor para frente dele
+                  this.quill.setSelection(range.index + 1, 0, 'silent');
+                  // Retorna false para parar a propagação (não criar nova LI)
+                  return false;
+                }
+              }
+            }
+          }
+        }
       });
 
       // Date
