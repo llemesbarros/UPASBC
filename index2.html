@@ -15,7 +15,6 @@
 			@media print {
 				@page { size: A4 portrait; }
 				.noprint{display:none}
-				body.duasvias textarea{font-size:130%;}
 				body.duasvias #pagenum{font-size:14px; display:inherit;}
 				#page1 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"1ª VIA FARMÁCIA"; }
 				#page2 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"2ª VIA PACIENTE"; }
@@ -34,7 +33,6 @@
 				var data = document.getElementById('data');
 				var texto = document.getElementById('texto');
 				data.value = new Date().toLocaleString("sv-SE",{dateStyle: "short", timeZone: "America/Sao_Paulo"});
-				var texto = document.getElementById('texto');
 				medicamentos.forEach(function(element,index,array){
 					var option = document.createElement("option");
 					option.text = element.nome;
@@ -126,7 +124,9 @@
 				<button type="button" onclick="window.print()">Imprimir</button>
 				<label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
 			</p>
-			<div id="texto" tabindex="-1" autofocus></div>
+			<div id="texto">
+				<p>USO INTERNO</p>
+			</div>
 			<table>
 				<tr style="width:100%">
 					<th>DATA:</th>
