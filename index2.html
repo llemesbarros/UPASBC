@@ -18,7 +18,12 @@
 			#medicamentos,button{padding:5px;}
 			#page1{page-break-after: always;}
 			#pagenum{display:none}
-			.med-item{margin-bottom:15px;}
+			.med-item {
+				margin-bottom: 12px;
+				padding-bottom: 6px;
+				border-bottom: 1px dashed #bbb;
+			}
+			.med-item:last-child {margin-bottom: 0;}
 
 			@media print {
 			  /* controla a área útil do A4 */
@@ -91,14 +96,16 @@
 			function addMedicamento(selectEl) {
 				const html = selectEl.value;
 				if (!html || html === "0") return;
-
-				// Insert at end of document (or you can use current cursor if you prefer)
+				// envolve o medicamento em um bloco com espaçamento
+				const bloco = `<div class="med-item">${html}</div>`;
+			
 				const insertAt = quill.getLength();
-				quill.clipboard.dangerouslyPasteHTML(insertAt, html);
-
+				quill.clipboard.dangerouslyPasteHTML(insertAt, bloco);
+			
 				selectEl.value = "0";
 				selectEl.focus();
 			}
+
 
 			function limparTudo() {
 				if (!quill) return;
