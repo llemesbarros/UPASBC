@@ -1,6 +1,9 @@
-﻿<html>
+<!DOCTYPE html>
+<html lang="pt-BR">
 	<head>
-		<link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAJ6TrAFy+8QCC0vgA7+/vAC6n7ACE0/gAS2RuAKbU5QDAwMAAv+3+ACek6gApoeYAAAAAAAAAAAAAAAAARERERERERABEREREREREAEREREREREQAREREeIRERABJmZSohUREAERERKolVEQAREREozUVRABJmZRDNlFUAEREREQzZRUAREREREM2W1BJmZmZRDNlxUREREREQzZVREREREREMzVJmZmZmURDM0REREREREQzRERERERERAMAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA" rel="icon" type="image/x-icon" />
+		<link href="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAJ6TrAFy+8QCC0vgA7+/vAC6n7ACE0/gAS2RuAKbU5QDAwMAAv+3+ACek6gApoeYAAAAAAAAAAAAAAAAARERERERERABEREREREREAEREREREREQAREREeIRERABJmZSohUREAERERKolVEQAREREozUVRABJmZRDNlFUAEREREQzZRUAREREREM2W1BJmZmZRDNlxUREREREQzZVREREREREMzVJmZmZmURDM0REREREREQzRERERERERAMAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAwAAAAMAAAADAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAA"
+		      rel="icon" type="image/x-icon" />
+
 		<style>
 			body{font-family:sans-serif;}
 			header img{margin-right:10px;}
@@ -8,13 +11,20 @@
 			.paciente td{width:100%; border-bottom:1px}
 			td input[type=text]{width:100%; height:28px; text-transform:uppercase; border-width:0 0 1px 0; font:inherit}
 			#data{height:28px; border-width:0 0 1px 0; text-align:center; font:inherit}
+
+			/* Quill editor height */
 			#texto{height: 640px;}
+
 			#medicamentos,button{padding:5px;}
 			#page1{page-break-after: always;}
 			#pagenum{display:none}
+
+			/* Toolbar custom */
+			#toolbar{margin-bottom:8px;}
+
 			@media print {
 				@page { size: A4 portrait; }
-				.noprint, .ql-toolbar{display:none}
+				.noprint, .ql-toolbar {display:none}
 				#texto{border:0;}
 				body.duasvias #pagenum{font-size:14px; display:inherit;}
 				#page1 #pagenum span::after{ position: relative; width:100%; text-align:right; top: 0px; right: 0px; display:block; content:"1ª VIA FARMÁCIA"; }
@@ -24,28 +34,100 @@
 			@media screen {
 				.printonly{display:none}
 			}
+
+			/* =========================
+			   FONTS for Quill (Font picker)
+			   ========================= */
+			@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+			/* Quill applies ql-font-<value> */
+			.ql-font-sans-serif { font-family: sans-serif; }
+			.ql-font-serif { font-family: serif; }
+			.ql-font-monospace { font-family: monospace; }
+			.ql-font-roboto { font-family: "Roboto", sans-serif; }
+
+			/* Show friendly names in font dropdown */
+			.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="sans-serif"]::before,
+			.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="sans-serif"]::before { content: "Sans"; }
+
+			.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="serif"]::before,
+			.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="serif"]::before { content: "Serif"; }
+
+			.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="monospace"]::before,
+			.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="monospace"]::before { content: "Mono"; }
+
+			.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="roboto"]::before,
+			.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="roboto"]::before { content: "Roboto"; }
 		</style>
+
 		<script src="medicamentos.json"></script>
 		<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 		<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+
 		<script>
-			window.onload = function(){
-				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
-				const quill = new Quill('#texto', {theme: 'snow'});
-				const content_editor = document.getElementsByClassName('ql-editor')[0];
-				var data = document.getElementById('data');
-				data.value = new Date().toLocaleString("sv-SE",{dateStyle: "short", timeZone: "America/Sao_Paulo"});
-				medicamentos.forEach(function(element,index,array){
-					var option = document.createElement("option");
+			// Make Quill accessible to inline handlers
+			let quill = null;
+
+			// Called by <select onchange="addMedicamento(this)">
+			function addMedicamento(selectEl) {
+				const html = selectEl.value;
+				if (!html || html === "0") return;
+
+				// Insert at end of document (or you can use current cursor if you prefer)
+				const insertAt = quill.getLength();
+				quill.clipboard.dangerouslyPasteHTML(insertAt, html);
+
+				selectEl.value = "0";
+			}
+
+			function limparTudo() {
+				if (!quill) return;
+				quill.setContents([]);
+			}
+
+			window.addEventListener('DOMContentLoaded', function () {
+				// Load medicamentos from localStorage if present
+				if (window.localStorage.medicamentos != undefined) {
+					medicamentos = JSON.parse(localStorage.medicamentos);
+				}
+
+				// Whitelist fonts for Quill
+				const Font = Quill.import('formats/font');
+				Font.whitelist = ['sans-serif', 'serif', 'monospace', 'roboto'];
+				Quill.register(Font, true);
+
+				// Init Quill with custom toolbar
+				quill = new Quill('#texto', {
+					theme: 'snow',
+					modules: {
+						toolbar: '#toolbar'
+					}
+				});
+
+				// Date
+				const data = document.getElementById('data');
+				data.value = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
+
+				// Populate medicamentos dropdown
+				medicamentos.forEach(function (element) {
+					const option = document.createElement("option");
 					option.text = element.nome;
-					option.value = '<p><strong>' + element.descricao + '</strong><br/>' + element.posologia + '</p>' ;
+					option.value = '<p><strong>' + element.descricao + '</strong><br/>' + element.posologia + '</p>';
 					document.getElementById('medicamentos').add(option);
 				});
+
+				// URL params
 				const urlParams = new URLSearchParams(window.location.search);
-				document.getElementById('nome_paciente').value = urlParams.get('nome');
-				document.getElementById('id_paciente').value = urlParams.get('id');
-				const unidade = {nome: urlParams.get('unidade'), endereco: 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande'};
-				switch(urlParams.get('unidade')){
+				document.getElementById('nome_paciente').value = urlParams.get('nome') || '';
+				document.getElementById('id_paciente').value = urlParams.get('id') || '';
+
+				// Unidade
+				const unidade = {
+					nome: urlParams.get('unidade'),
+					endereco: 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande'
+				};
+
+				switch (urlParams.get('unidade')) {
 					case "UPA RIACHO GRANDE":
 						unidade.endereco = 'Rua Marcilio Conrado, n 333 - Bairro Riacho Grande';
 						break;
@@ -57,57 +139,64 @@
 						break;
 					case "UPA ALVES DIAS/ASSUNÇÃO":
 						unidade.endereco = 'Av. Humberto de Alencar Castelo Branco, 4220 - Alves Dias';
-						break;	
+						break;
 					case "UPA UPA DEMARCHI/BATISTINI":
 						unidade.endereco = 'R. Valdomiro Luís, 303 - Demarchi';
-						break;	
+						break;
 					case "UPA PAULICEIA/TABOAO":
 						unidade.endereco = 'R. Pedro de Tolêdo, 326 - Paulicéia';
-						break;	
+						break;
 					case "UPA SAO PEDRO":
 						unidade.endereco = 'Av. Dom Pedro de Alcântara, 273 - Montanhão';
-						break;	
+						break;
 					case "UPA SILVINA":
 						unidade.endereco = 'Av. Dr. José Fornari, 509 - Ferrazópolis';
-						break;	
+						break;
 					case "UPA UNIÃO/ALVARENGA":
 						unidade.endereco = 'Estr. dos Alvarengas, 5779 - Alvarenga';
-						break;	
+						break;
 					default:
 						unidade.nome = 'UPA RIACHO GRANDE';
-						console.log('Unidade não fornecida')
+						console.log('Unidade não fornecida');
 				}
-				document.getElementById('unidade_nome').innerHTML = unidade.nome;
-				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
-			}
-			window.onbeforeprint = function(){
-				if(document.getElementById('segundavia').checked){
-					clone = document.getElementById('page1').cloneNode(true);
+
+				document.getElementById('unidade_nome').innerHTML = unidade.nome || '';
+				document.getElementById('unidade_endereco').innerHTML = unidade.endereco || '';
+			});
+
+			window.onbeforeprint = function () {
+				if (document.getElementById('segundavia').checked) {
+					const clone = document.getElementById('page1').cloneNode(true);
 					clone.id = 'page2';
 					clone.classList.add('printonly');
 					document.body.classList.add('duasvias');
 					document.body.appendChild(clone);
 				}
 			}
-			window.onafterprint = function(){
-				if(apagar = document.getElementById('page2')){
-					apagar.remove();
-				}
+
+			window.onafterprint = function () {
+				const apagar = document.getElementById('page2');
+				if (apagar) apagar.remove();
 				document.body.classList.remove('duasvias');
 			}
 		</script>
+
 		<title>RECEITUÁRIO</title>
 	</head>
+
 	<body>
 		<div id="page1">
 			<div id="pagenum" class="noprint"><span></span></div>
+
 			<header>
 				<img src="logo-sbc.jpg" height="100" align="left" />
 				<p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
 				<h2>RECEITUÁRIO</h2>
 				<p>SECRETARIA DE SAÚDE</p>
 			</header>
+
 			<br/>
+
 			<table class="paciente">
 				<tr>
 					<th>NOME:</th>
@@ -118,16 +207,56 @@
 					<td><input type="text" id="id_paciente" /></td>
 				</tr>
 			</table>
+
 			<br/>
+
 			<p class="noprint">
-				<select id="medicamentos" onchange="content_editor.innerHTML += (this.value); this.value = 0">
+				<select id="medicamentos" onchange="addMedicamento(this)">
 					<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
 				</select>
-				<button type="button" onclick="content_editor.innerHTML=''">Limpar tudo</button>
+
+				<button type="button" onclick="limparTudo()">Limpar tudo</button>
 				<button type="button" onclick="window.print()">Imprimir</button>
 				<label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
 			</p>
+
+			<!-- Custom toolbar for Quill (with font picker) -->
+			<div id="toolbar" class="noprint">
+				<span class="ql-formats">
+					<select class="ql-font">
+						<option selected value="sans-serif">Sans</option>
+						<option value="serif">Serif</option>
+						<option value="monospace">Mono</option>
+						<option value="roboto">Roboto</option>
+					</select>
+
+					<select class="ql-size">
+						<option value="small"></option>
+						<option selected></option>
+						<option value="large"></option>
+						<option value="huge"></option>
+					</select>
+				</span>
+
+				<span class="ql-formats">
+					<button class="ql-bold"></button>
+					<button class="ql-italic"></button>
+					<button class="ql-underline"></button>
+				</span>
+
+				<span class="ql-formats">
+					<button class="ql-list" value="ordered"></button>
+					<button class="ql-list" value="bullet"></button>
+				</span>
+
+				<span class="ql-formats">
+					<button class="ql-clean"></button>
+				</span>
+			</div>
+
+			<!-- Editor -->
 			<div id="texto"></div>
+
 			<table>
 				<tr style="width:100%">
 					<th>DATA:</th>
@@ -139,6 +268,7 @@
 					<td align="center">CARIMBO E ASSINATURA</td>
 				</tr>
 			</table>
+
 			<h5 align="center">
 				<span id="unidade_nome"></span> <br/>
 				<span id="unidade_endereco"></span> <br/>
