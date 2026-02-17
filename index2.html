@@ -137,7 +137,7 @@
 
       // Monta 1 linha (1 item de lista)
       // Descrição em negrito, depois separador e posologia
-      const linha = `${desc} + `<br/>` + ${pos ? " — " + pos : ""}`;
+      const linha = `${desc} `\n` ${pos ? " — " + pos : ""}`;
 
       // Insere o texto
       quill.insertText(idx, linha, { bold: false }, 'user');
