@@ -120,7 +120,7 @@
 			</table>
 			<br/>
 			<p class="noprint">
-				<select id="medicamentos" onchange="texto.innerHTML += (this.value); this.value = 0">
+				<select id="medicamentos" onchange="texto.innerHTML = (this.value); this.value = 0">
 					<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
 				</select>
 				<button type="button" onclick="texto.innerHTML=''">Limpar tudo</button>
