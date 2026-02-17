@@ -38,7 +38,7 @@
 				medicamentos.forEach(function(element,index,array){
 					var option = document.createElement("option");
 					option.text = element.nome;
-					option.value = element.descricao + '\n' + element.posologia + '\n\n' ;
+					option.value = '<p><strong>' element.descricao + '</strong>' + element.posologia + '</p>' ;
 					document.getElementById('medicamentos').add(option);
 				});
 				const urlParams = new URLSearchParams(window.location.search);
