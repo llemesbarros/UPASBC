@@ -1,4 +1,3 @@
-<!--Versão 2.0-->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -92,13 +91,17 @@
     /* =========================
        FONTS for Quill (Font picker)
        ========================= */
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+    /* Importando Roboto e Playwrite AT (Österreich) */
+    @import url('https://fonts.googleapis.com/css2?family=Playwrite+AT:wght@100..400&family=Roboto:wght@400;700&display=swap');
 
     .ql-font-sans-serif { font-family: sans-serif; }
     .ql-font-serif { font-family: serif; }
     .ql-font-monospace { font-family: monospace; }
     .ql-font-roboto { font-family: "Roboto", sans-serif; }
+    /* Nova classe para Playwrite */
+    .ql-font-playwrite { font-family: "Playwrite AT", cursive; }
 
+    /* Rótulos do Dropdown */
     .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="sans-serif"]::before,
     .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="sans-serif"]::before { content: "Sans"; }
 
@@ -110,6 +113,10 @@
 
     .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="roboto"]::before,
     .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="roboto"]::before { content: "Roboto"; }
+
+    /* Rótulo visual para Playwrite */
+    .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="playwrite"]::before,
+    .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="playwrite"]::before { content: "Playwrite"; }
   </style>
 
   <script src="medicamentos.json"></script>
@@ -119,7 +126,6 @@
   <script>
     let quill = null;
 
-    // === FUNÇÃO ADD MEDICAMENTO (Mantida a versão aprovada) ===
     function addMedicamento(selectEl) {
       if (!quill) return;
 
@@ -130,239 +136,6 @@
       const pos  = opt.dataset.pos  || "";
       if (!desc) return;
 
-      // Pega a posição logo antes do \n final do documento
       const index = Math.max(0, quill.getLength() - 1);
 
       // 1. Insere o NOME (Negrito)
-      quill.insertText(index, desc, { bold: true }, 'user');
-
-      // 2. Se tiver posologia, insere a quebra + texto (sem negrito)
-      let nextIndex = index + desc.length;
-      if (pos) {
-         quill.insertEmbed(nextIndex, 'softbreak', true, 'user');
-         nextIndex++;
-         quill.insertText(nextIndex, pos, { bold: false }, 'user'); 
-         nextIndex += pos.length;
-      }
-
-      // 3. Insere a quebra de linha FINAL "limpa" para fechar o item
-      quill.insertText(nextIndex, "\n", {}, 'user');
-
-      // 4. Formata a linha recém criada como Lista Ordenada
-      quill.formatLine(nextIndex, 1, 'list', 'ordered', 'user');
-
-      // 5. Ajusta cursor e limpa select
-      quill.setSelection(quill.getLength(), 0, 'silent');
-      selectEl.value = "0";
-      selectEl.focus();
-    }
-
-    function limparTudo() {
-      if (!quill) return;
-      quill.setContents([]);
-    }
-
-    window.addEventListener("DOMContentLoaded", function () {
-      // carregar medicamentos
-      let meds = [];
-      try {
-        if (window.localStorage.medicamentos != undefined) {
-          meds = JSON.parse(localStorage.medicamentos);
-        } else if (Array.isArray(window.medicamentos)) {
-          meds = window.medicamentos;
-        }
-      } catch(e) {
-        meds = Array.isArray(window.medicamentos) ? window.medicamentos : [];
-      }
-
-      // Whitelist fonts
-      const Font = Quill.import("formats/font");
-      Font.whitelist = ["sans-serif", "serif", "monospace", "roboto"];
-      Quill.register(Font, true);
-
-      // 1. REGISTRA O BLOT CUSTOMIZADO PARA <BR> (SoftBreak)
-      const Embed = Quill.import("blots/embed");
-      class SoftBreak extends Embed {
-        static blotName = "softbreak"; 
-        static tagName = "br";         
-      }
-      Quill.register(SoftBreak);
-
-      // 2. INICIA O QUILL COM A CONFIGURAÇÃO DE TECLADO INJETADA
-      // Colocar o 'bindings' aqui garante que ele seja carregado corretamente na inicialização
-      quill = new Quill("#texto", {
-        theme: "snow",
-        modules: { 
-          toolbar: "#toolbar",
-          keyboard: {
-            bindings: {
-              // Nome arbitrário para o binding
-              'softBreak': {
-                key: 'Enter',
-                shiftKey: true,
-                handler: function(range, context) {
-                  // Insere o <br> customizado
-                  this.quill.insertEmbed(range.index, 'softbreak', true, 'user');
-                  // Move o cursor para frente dele
-                  this.quill.setSelection(range.index + 1, 0, 'silent');
-                  // Retorna false para parar a propagação (não criar nova LI)
-                  return false;
-                }
-              }
-            }
-          }
-        }
-      });
-
-      // Date
-      const data = document.getElementById("data");
-      data.value = new Date().toLocaleDateString("sv-SE", { timeZone: "America/Sao_Paulo" });
-
-      // Populate select
-      const sel = document.getElementById("medicamentos");
-      if (Array.isArray(meds)) {
-        meds.forEach(function (element) {
-          const option = document.createElement("option");
-          option.text = element.nome || "(sem nome)";
-          option.value = element.nome || "1";
-          option.dataset.desc = element.descricao || "";
-          option.dataset.pos  = element.posologia || "";
-          sel.add(option);
-        });
-      }
-
-      // URL params e Unidade
-      const urlParams = new URLSearchParams(window.location.search);
-      document.getElementById("nome_paciente").value = urlParams.get("nome") || "";
-      document.getElementById("id_paciente").value = urlParams.get("id") || "";
-
-      const unidade = {
-        nome: urlParams.get("unidade"),
-        endereco: "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande"
-      };
-
-      switch (urlParams.get("unidade")) {
-        case "UPA RIACHO GRANDE": unidade.endereco = "Rua Marcilio Conrado, n 333 - Bairro Riacho Grande"; break;
-        case "UPA RUDGE RAMOS": unidade.endereco = "Rua Angela Tomé, n 256 - Bairro Rudge Ramos"; break;
-        case "UPA BAETA NEVES": unidade.endereco = "R. dos Vianas, 933 - Baeta Neves"; break;
-        case "UPA ALVES DIAS/ASSUNÇÃO": unidade.endereco = "Av. Humberto de Alcântara Castelo Branco, 4220 - Alves Dias"; break;
-        case "UPA UPA DEMARCHI/BATISTINI": unidade.endereco = "R. Valdomiro Luís, 303 - Demarchi"; break;
-        case "UPA PAULICEIA/TABOAO": unidade.endereco = "R. Pedro de Tolêdo, 326 - Paulicéia"; break;
-        case "UPA SAO PEDRO": unidade.endereco = "Av. Dom Pedro de Alcântara, 273 - Montanhão"; break;
-        case "UPA SILVINA": unidade.endereco = "Av. Dr. José Fornari, 509 - Ferrazópolis"; break;
-        case "UPA UNIÃO/ALVARENGA": unidade.endereco = "Estr. dos Alvarengas, 5779 - Alvarenga"; break;
-        default: unidade.nome = "UPA RIACHO GRANDE"; console.log("Unidade não fornecida");
-      }
-
-      document.getElementById("unidade_nome").innerHTML = unidade.nome || "";
-      document.getElementById("unidade_endereco").innerHTML = unidade.endereco || "";
-    });
-
-    window.onbeforeprint = function () {
-      if (document.getElementById("segundavia").checked) {
-        const clone = document.getElementById("page1").cloneNode(true);
-        clone.id = "page2";
-        clone.classList.add("printonly");
-        document.body.classList.add("duasvias");
-        document.body.appendChild(clone);
-      }
-    };
-
-    window.onafterprint = function () {
-      const apagar = document.getElementById("page2");
-      if (apagar) apagar.remove();
-      document.body.classList.remove("duasvias");
-    };
-  </script>
-
-  <title>RECEITUÁRIO</title>
-</head>
-
-<body>
-  <div id="page1">
-    <div id="pagenum" class="printonly"><span></span></div>
-
-    <header>
-      <img src="logo-sbc.jpg" height="100" align="left" />
-      <p>PREFEITURA DO MUNÍCIPIO DE SÃO BERNARDO DO CAMPO</p>
-      <h2>RECEITUÁRIO</h2>
-      <p>SECRETARIA DE SAÚDE</p>
-    </header>
-
-    <br/>
-
-    <table class="paciente">
-      <tr>
-        <th>NOME:</th>
-        <td><input type="text" id="nome_paciente" /></td>
-      </tr>
-      <tr>
-        <th>HYGIA:</th>
-        <td><input type="text" id="id_paciente" /></td>
-      </tr>
-    </table>
-
-    <br/>
-
-    <p class="noprint">
-      <select id="medicamentos" onchange="addMedicamento(this)">
-        <option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
-      </select>
-
-      <button type="button" onclick="limparTudo()">Limpar tudo</button>
-      <button type="button" onclick="window.print()">Imprimir</button>
-      <label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
-    </p>
-
-    <div id="toolbar" class="noprint">
-      <span class="ql-formats">
-        <select class="ql-font">
-          <option selected value="sans-serif">Sans</option>
-          <option value="serif">Serif</option>
-          <option value="monospace">Mono</option>
-          <option value="roboto">Roboto</option>
-        </select>
-        <select class="ql-size">
-          <option value="small"></option>
-          <option selected></option>
-          <option value="large"></option>
-          <option value="huge"></option>
-        </select>
-      </span>
-      <span class="ql-formats">
-        <button class="ql-bold"></button>
-        <button class="ql-italic"></button>
-        <button class="ql-underline"></button>
-      </span>
-      <span class="ql-formats">
-        <button class="ql-list" value="ordered"></button>
-        <button class="ql-list" value="bullet"></button>
-      </span>
-      <span class="ql-formats">
-        <button class="ql-clean"></button>
-      </span>
-    </div>
-
-    <div id="texto"></div>
-
-    <table>
-      <tr style="width:100%">
-        <th>DATA:</th>
-        <td style="width:300px"><input type="date" id="data" /></td>
-        <td><input type="text" size="50" /></td>
-      </tr>
-      <tr>
-        <td colspan="2"></td>
-        <td align="center">CARIMBO E ASSINATURA</td>
-      </tr>
-    </table>
-
-    <h5 align="center">
-      <span id="unidade_nome"></span> <br/>
-      <span id="unidade_endereco"></span> <br/>
-      São Bernardo do Campo - SP <br/>
-      CNPJ: 46.523.239/0001-47
-    </h5>
-  </div>
-</body>
-</html>
