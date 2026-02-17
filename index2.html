@@ -61,20 +61,15 @@
       /* hide controls */
       .noprint, .ql-toolbar { display:none !important; }
 
-      /* show header pagination on top of each printed page */
       #pagenum{
         display:block !important;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
+        position: relative;      
         font-size: 14px;
         text-align: right;
-        padding-top: 2mm;
+        margin: 0 0 4mm 0;
+        padding: 0;
       }
 
-      /* compensate fixed header so it doesn't overlap content */
-      #page1, #page2 { padding-top: 8mm; }
 
       /* always break between vias */
       #page1 { break-after: page; page-break-after: always; }
