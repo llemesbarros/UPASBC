@@ -118,6 +118,7 @@
   <script>
     let quill = null;
 
+    // === FUNÇÃO CORRIGIDA ===
     function addMedicamento(selectEl) {
       if (!quill) return;
 
@@ -128,25 +129,31 @@
       const pos  = opt.dataset.pos  || "";
       if (!desc) return;
 
-      // sempre no fim (antes do \n final do editor)
-      const base = Math.max(0, quill.getLength() - 1);
+      // Pega a posição logo antes do \n final do documento
+      const index = Math.max(0, quill.getLength() - 1);
 
-      // 1) cria o <li> de forma “nativa”: texto + \n com atributo de lista
-      quill.insertText(base, desc, { bold: true }, "user");
-      quill.insertText(base + desc.length, "\n", { list: "ordered" }, "user");
+      // 1. Insere o NOME (Negrito)
+      // Nota: Não inserimos o \n aqui, nem a formatação de lista ainda.
+      quill.insertText(index, desc, { bold: true }, 'user');
 
-      // 2) agora o item já existe; inserir <br> e posologia ANTES do \n do <li>
-      let insertAt = base + desc.length;
-
+      // 2. Se tiver posologia, insere a quebra + texto (sem negrito)
+      let nextIndex = index + desc.length;
       if (pos) {
-        quill.insertEmbed(insertAt, "break", true, "user");
-        insertAt += 1;
-        quill.insertText(insertAt, pos, {}, "user");
+         quill.insertEmbed(nextIndex, 'break', true, 'user');
+         nextIndex++;
+         quill.insertText(nextIndex, pos, { bold: false }, 'user'); 
+         nextIndex += pos.length;
       }
 
-      // cursor no fim do documento
-      quill.setSelection(quill.getLength() - 1, 0, "silent");
+      // 3. Insere a quebra de linha FINAL "limpa"
+      quill.insertText(nextIndex, "\n", {}, 'user');
 
+      // 4. AGORA aplica a formatação de lista na linha inteira.
+      // Isso evita o bug do <br> fantasma no início do LI.
+      quill.formatLine(nextIndex, 1, 'list', 'ordered', 'user');
+
+      // 5. Ajusta cursor e limpa select
+      quill.setSelection(quill.getLength(), 0, 'silent');
       selectEl.value = "0";
       selectEl.focus();
     }
@@ -188,19 +195,18 @@
         modules: { toolbar: "#toolbar" }
       });
 
-      // === CORREÇÃO: Shift+Enter => <br/> com prioridade ALTA ===
+      // Shift+Enter => <br/> (Prioridade Alta)
       const keyboard = quill.getModule('keyboard');
       keyboard.addBinding({ 
-          key: 13, // Enter
+          key: 13, 
           shiftKey: true 
       }, {
-          priority: 1000 // Garante prioridade sobre o módulo de Lista
+          priority: 1000 
       }, function(range, context) {
           this.quill.insertEmbed(range.index, "break", true, "user");
           this.quill.setSelection(range.index + 1, 0, "silent");
-          return false; // Impede a ação padrão (criar novo LI)
+          return false; 
       });
-      // ==========================================================
 
       // Date
       const data = document.getElementById("data");
