@@ -25,8 +25,8 @@
 			}
 		</style>
 		<script src="medicamentos.json"></script>
-		<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.core.css" rel="stylesheet">
-		<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.core.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+		<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 		<script>
 			window.onload = function(){
 				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
@@ -77,7 +77,7 @@
 				}
 				document.getElementById('unidade_nome').innerHTML = unidade.nome;
 				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
-				const quill = new Quill('#texto');
+				const quill = new Quill('#texto', {theme: 'snow'});
 			}
 			window.onbeforeprint = function(){
 				if(document.getElementById('segundavia').checked){
