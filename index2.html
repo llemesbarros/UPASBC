@@ -33,7 +33,6 @@
 				if(window.localStorage.medicamentos!=undefined){medicamentos=JSON.parse(localStorage.medicamentos);}
 				const quill = new Quill('#texto', {theme: 'snow'});
 				var data = document.getElementById('data');
-				var content_editor = document.getElementsByClassName('ql-editor')[0];
 				data.value = new Date().toLocaleString("sv-SE",{dateStyle: "short", timeZone: "America/Sao_Paulo"});
 				medicamentos.forEach(function(element,index,array){
 					var option = document.createElement("option");
@@ -79,8 +78,9 @@
 				}
 				document.getElementById('unidade_nome').innerHTML = unidade.nome;
 				document.getElementById('unidade_endereco').innerHTML = unidade.endereco;
-				var content_editor = document.getElementsByClassName('ql-editor')[0];
 				console.log(document.getElementsByClassName('ql-editor')[0]);
+				var content_editor = document.getElementsByClassName('ql-editor')[0];
+				console.log(content_editor);
 			}
 			window.onbeforeprint = function(){
 				if(document.getElementById('segundavia').checked){
