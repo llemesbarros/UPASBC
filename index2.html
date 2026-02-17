@@ -8,7 +8,7 @@
 			.paciente td{width:100%; border-bottom:1px}
 			td input[type=text]{width:100%; height:28px; text-transform:uppercase; border-width:0 0 1px 0; font:inherit}
 			#data{height:28px; border-width:0 0 1px 0; text-align:center; font:inherit}
-			#texto{height: 640px; border:0;}
+			#texto{height: 640px;}
 			#medicamentos,button{padding:5px;}
 			#page1{page-break-after: always;}
 			#pagenum{display:none}
@@ -38,7 +38,7 @@
 				medicamentos.forEach(function(element,index,array){
 					var option = document.createElement("option");
 					option.text = element.nome;
-					option.value = '<p><strong>' + element.descricao + '</strong>' + element.posologia + '</p>' ;
+					option.value = '<p><strong>' + element.descricao + '</strong><br/>' + element.posologia + '</p>' ;
 					document.getElementById('medicamentos').add(option);
 				});
 				const urlParams = new URLSearchParams(window.location.search);
@@ -90,7 +90,9 @@
 				}
 			}
 			window.onafterprint = function(){
-				document.getElementById('page2').remove();
+				if(var apagar = document.getElementById('page2')){
+					apagar.remove();
+				}
 				document.body.classList.remove('duasvias');
 			}
 		</script>
@@ -121,13 +123,11 @@
 				<select id="medicamentos" onchange="texto.innerHTML += (this.value); this.value = 0">
 					<option hidden selected value="0">ADICIONAR MEDICAMENTO</option>
 				</select>
-				<button type="button" onclick="texto.value=''">Limpar tudo</button>
+				<button type="button" onclick="texto.innerHTML=''">Limpar tudo</button>
 				<button type="button" onclick="window.print()">Imprimir</button>
 				<label><input type="checkbox" id="segundavia" /> Imprimir 2 vias</label>
 			</p>
-			<div id="texto">
-				<p>USO INTERNO</p>
-			</div>
+			<div id="texto"></div>
 			<table>
 				<tr style="width:100%">
 					<th>DATA:</th>
