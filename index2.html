@@ -25,6 +25,29 @@
 			}
 			.med-item:last-child {margin-bottom: 0;}
 
+			/* container do conteúdo do editor */
+			.ql-editor {
+				counter-reset: med-counter;
+			}
+			
+			/* cada medicamento */
+			.med-item {
+				counter-increment: med-counter;
+				margin-bottom: 12px;
+				padding-left: 28px;
+				position: relative;
+			}
+			
+			/* número automático */
+			.med-item::before {
+				content: counter(med-counter) ".";
+				position: absolute;
+				left: 0;
+				top: 0;
+				font-weight: bold;
+			}
+
+
 			@media print {
 			  /* controla a área útil do A4 */
 			  @page { size: A4 portrait; margin: 10mm; }
