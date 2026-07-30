@@ -5,6 +5,7 @@ if (document.getElementById('tspaciente') != null){
   const buttonElement = document.createElement('a');
   const buttonElement2 = document.createElement('a');
   const id_paciente = document.getElementById('tspaciente').innerHTML;
+  const nome_medico = document.getElementById('ddprofis').innerHTML;
   const unidade = document.getElementById('Topo1_PageUS').innerHTML;
   const nome_paciente = (function(){
   const el = document.getElementById('griFichasGBCR__ctl2_txtNomePac2');
@@ -23,7 +24,7 @@ if (document.getElementById('tspaciente') != null){
   buttonElement.target = '_blank';
   buttonElement.classList.add("TLinkButtonN");
   buttonElement2.classList.add("TLinkButtonN");
-  buttonElement.href = "https://llemesbarros.github.io/UPASBC/?unidade=" + unidade + "&id=" + id_paciente + "&nome=" + nome_paciente;
+  buttonElement.href = "https://llemesbarros.github.io/UPASBC/?unidade=" + unidade + "&id=" + id_paciente + "&nome=" + nome_paciente + "&medico=" + nome_medico ;
   buttonElement2.href = "#";
 
   // Estiliza o button para que ele apareça de forma visível
