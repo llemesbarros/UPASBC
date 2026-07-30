@@ -188,7 +188,7 @@ input {
   background: transparent;
   text-transform: uppercase;
 }
-#assinatura-simples{
+#assinatura_simples{
   border-bottom: 1px solid gray !important;
 }
 .editor-simples {
