@@ -421,4 +421,10 @@ input {
     height: 100mm;
     border: none !important;
   }
+  
+  .date-input::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+  }
+  
 }
