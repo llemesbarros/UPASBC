@@ -686,7 +686,7 @@ function prepararImpressao() {
 
   pagina2.id = "controle_page2";
 
-  pagina2.classList.add(˜printonly˜);
+  pagina2.classList.add("printonly");
 
   const via1 =
     pagina1.querySelector(".identificacao-via");
