@@ -41,7 +41,6 @@ input {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  max-width: 210mm;
   margin: 0 auto 12px;
   padding: 10px;
   background: #fff;
