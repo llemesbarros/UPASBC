@@ -374,7 +374,9 @@ input {
     size: A4 portrait;
     margin: 0;
   }
-
+  .ql-editor.ql-blank::before{
+    display:none !important;
+  }
   html,
   body {
     margin: 0;
