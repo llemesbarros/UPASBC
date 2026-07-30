@@ -1,0 +1,424 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --cor-borda: #111;
+  --cor-fundo: #ececec;
+  --cor-vermelha: #e00000;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  padding: 18px;
+  background: var(--cor-fundo);
+  color: #111;
+  font-family: Arial, sans-serif;
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+button,
+select {
+  padding: 7px 9px;
+}
+
+input {
+  color: inherit;
+}
+
+.controles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 210mm;
+  margin: 0 auto 12px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #bbb;
+}
+
+#status_medicamentos {
+  font-size: 12px;
+}
+
+.pagina {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 10mm;
+  overflow: hidden;
+  background: #fff;
+}
+
+.printonly {
+  display: none;
+}
+
+.identificacao-via {
+  margin-bottom: 2mm;
+  text-align: right;
+  font-size: 12px;
+}
+
+/* FONTES DO QUILL */
+
+.ql-font-sans-serif {
+  font-family: Arial, sans-serif;
+}
+
+.ql-font-serif {
+  font-family: Georgia, serif;
+}
+
+.ql-font-monospace {
+  font-family: "Courier New", monospace;
+}
+
+.ql-font-verdana {
+  font-family: Verdana, Arial, sans-serif;
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="sans-serif"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="sans-serif"]::before {
+  content: "Sans";
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="serif"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="serif"]::before {
+  content: "Serif";
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="monospace"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="monospace"]::before {
+  content: "Mono";
+}
+
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-value="verdana"]::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-value="verdana"]::before {
+  content: "Verdana";
+}
+
+.toolbar {
+  margin-top: 12px;
+}
+
+.editor .ql-editor {
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.editor .ql-editor ol,
+.editor .ql-editor ul {
+  margin: 0;
+  padding-left: 30px;
+}
+
+.editor .ql-editor li {
+  margin: 0 0 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #bbb;
+}
+
+.editor .ql-editor li:last-child {
+  margin-bottom: 0;
+}
+
+.editor .ql-editor li::marker {
+  font-weight: bold;
+}
+
+/*
+ * Quebra suave real inserida pelo Quill.
+ * Não altere para display:block: o próprio <br> já faz a quebra.
+ */
+.editor .ql-editor br.ql-soft-break {
+  display: inline;
+}
+
+/* MODELO SIMPLES */
+
+.cabecalho-simples {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.logo-simples {
+  width: 90px;
+  height: auto;
+  margin-right: 14px;
+}
+
+.cabecalho-simples p,
+.cabecalho-simples h1 {
+  margin: 7px 0;
+}
+
+.tabela-paciente {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela-paciente th {
+  width: 72px;
+  padding-top: 10px;
+  text-align: left;
+}
+
+.tabela-paciente td {
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.tabela-paciente input,
+.assinatura-simples input {
+  width: 100%;
+  height: 30px;
+  border: 0;
+  background: transparent;
+  text-transform: uppercase;
+}
+
+.editor-simples {
+  height: 160mm;
+}
+
+.assinatura-simples {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.assinatura-simples .coluna-data {
+  width: 300px;
+}
+
+.centralizado {
+  text-align: center;
+}
+
+.rodape-unidade {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* CONTROLE ESPECIAL */
+
+.pagina-controle {
+  padding: 8mm 14mm;
+  font-size: 11px;
+}
+
+.cabecalho-controle {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 6mm;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.logo-controle {
+  width: 90px;
+  height: auto;
+}
+
+.vermelho {
+  color: var(--cor-vermelha);
+}
+
+.titulo-controle {
+  margin: 0;
+  text-align: center;
+  font-size: 16px;
+}
+
+.subtitulo-controle {
+  margin-bottom: 2mm;
+  text-align: center;
+  font-weight: bold;
+}
+
+.bloco-formulario {
+  min-height: 25mm;
+  padding: 2mm;
+  border: 1px solid var(--cor-borda);
+}
+
+.bloco-formulario + .bloco-formulario {
+  border-top: 0;
+}
+
+.bloco-formulario h2,
+.rodape-controle h2 {
+  margin: 0 0 2mm;
+  text-align: center;
+  font-size: 11px;
+}
+
+.linha-formulario {
+  display: flex;
+  min-height: 5mm;
+  align-items: baseline;
+  gap: 3mm;
+}
+
+.linha-formulario label {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 1mm;
+}
+
+.linha-formulario input {
+  flex: 1;
+  min-width: 0;
+  height: 5mm;
+  padding: 0 1mm;
+  border: 0;
+  border-bottom: 1px dotted #777;
+  background: transparent;
+  text-transform: uppercase;
+}
+
+.linha-endereco-telefone label:first-child {
+  flex: 2;
+}
+
+.linha-endereco-telefone label:last-child {
+  flex: 1;
+}
+
+.titulo-prescricao {
+  margin: 3mm 0 2mm;
+  text-align: center;
+  font-size: 14px;
+}
+
+.editor-controle {
+  height: 100mm;
+}
+
+.assinaturas-controle {
+  display: grid;
+  grid-template-columns: 1fr 45mm;
+  gap: 20mm;
+  margin-top: 7mm;
+  text-align: center;
+}
+
+.linha-assinatura {
+  margin-bottom: 1mm;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.data-emissao input {
+  width: 38mm;
+  border: 0;
+  border-bottom: 1px solid var(--cor-borda);
+  background: transparent;
+  text-align: center;
+}
+
+.rodape-controle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 38mm;
+  margin-top: 7mm;
+  border: 1px solid var(--cor-borda);
+}
+
+.rodape-controle > div {
+  padding: 3mm;
+}
+
+.rodape-controle > div:first-child {
+  border-right: 1px solid var(--cor-borda);
+}
+
+.rodape-controle label {
+  display: flex;
+  align-items: baseline;
+  min-height: 5mm;
+  gap: 1mm;
+}
+
+.rodape-controle input {
+  flex: 1;
+  min-width: 0;
+  height: 5mm;
+  padding: 0 1mm;
+  border: 0;
+  border-bottom: 1px dotted #777;
+  background: transparent;
+  text-transform: uppercase;
+}
+
+/* IMPRESSÃO */
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff;
+  }
+
+  .noprint,
+  .ql-toolbar {
+    display: none !important;
+  }
+
+  .printonly {
+    display: block !important;
+  }
+
+  main[hidden] {
+    display: none !important;
+  }
+
+  .pagina {
+    width: 210mm;
+    height: 297mm;
+    min-height: 297mm;
+    margin: 0;
+    overflow: hidden;
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .pagina:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .ql-container {
+    border: 0 !important;
+  }
+
+  .editor-simples {
+    height: 160mm;
+  }
+
+  .editor-controle {
+    height: 100mm;
+    border: none !important;
+  }
+}
