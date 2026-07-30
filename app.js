@@ -10,7 +10,7 @@ const UNIDADES = [
     nome: "UPA RIACHO GRANDE",
     endereco: "Rua Marcílio Conrado, nº 333 - Bairro Riacho Grande",
     cidade: "São Bernardo do Campo/SP",
-    telefone: "4357-2356",
+    telefone: "(11) 4357-2356",
     cnes: "6650864"
   },
   {
@@ -18,32 +18,32 @@ const UNIDADES = [
     nome: "UPA RUDGE RAMOS",
     endereco: "Rua Angela Tomé, nº 256 - Bairro Rudge Ramos",
     cidade: "São Bernardo do Campo/SP",
-    telefone: "",
-    cnes: ""
+    telefone: "(11) 4368-1222",
+    cnes: "7030878"
   },
   {
     aliases: ["UPA BAETA NEVES"],
     nome: "UPA BAETA NEVES",
     endereco: "Rua dos Vianas, nº 933 - Baeta Neves",
     cidade: "São Bernardo do Campo/SP",
-    telefone: "",
-    cnes: ""
+    telefone: "(11) 4125-9139",
+    cnes: "6844596"
   },
   {
     aliases: ["UPA ALVES DIAS/ASSUNÇÃO", "UPA ALVES DIAS/ASSUNCAO"],
     nome: "UPA ALVES DIAS/ASSUNÇÃO",
     endereco: "Av. Humberto de Alencar Castelo Branco, nº 4220 - Alves Dias",
     cidade: "São Bernardo do Campo/SP",
-    telefone: "",
-    cnes: ""
+    telefone: "(11) 4104-4018",
+    cnes: "7053835"
   },
   {
     aliases: ["UPA DEMARCHI/BATISTINI", "UPA UPA DEMARCHI/BATISTINI"],
     nome: "UPA DEMARCHI/BATISTINI",
     endereco: "Rua Valdomiro Luís, nº 303 - Demarchi",
     cidade: "São Bernardo do Campo/SP",
-    telefone: "",
-    cnes: ""
+    telefone: "(11) 4368-4333",
+    cnes: "6535798"
   },
   {
     aliases: ["UPA PAULICEIA/TABOAO", "UPA PAULICÉIA/TABOÃO"],
