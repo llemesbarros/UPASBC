@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/prescricao-upa24.schema.json",
+  "title": "Prescrição Médica UPA24",
+  "type": "object",
+  "required": [
+    "formato",
+    "versao",
+    "unidade",
+    "paciente",
+    "atendimento",
+    "prescricao"
+  ],
+  "properties": {
+    "formato": {
+      "const": "prescricao-medica-upa24"
+    },
+    "versao": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "ultimaAlteracao": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "unidade": {
+      "type": "string"
+    },
+    "paciente": {
+      "type": "object",
+      "properties": {
+        "nome": {
+          "type": "string"
+        },
+        "nascimento": {
+          "type": "string"
+        },
+        "idade": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "telefones": {
+          "type": "string"
+        },
+        "alergias": {
+          "type": "string"
+        }
+      }
+    },
+    "atendimento": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string"
+        },
+        "diagnosticos": {
+          "type": "string"
+        },
+        "sala": {
+          "type": "string"
+        },
+        "leito": {
+          "type": "string"
+        }
+      }
+    },
+    "prescricao": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 46
+          },
+          "medicamento": {
+            "type": "string"
+          },
+          "dose": {
+            "type": "string"
+          },
+          "via": {
+            "type": "string"
+          },
+          "frequencia": {
+            "type": "string"
+          },
+          "horarios": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4
+          }
+        }
+      }
+    },
+    "camposLaterais": {
+      "type": "object"
+    }
+  }
+}

@@ -1,0 +1,633 @@
+{
+  "formato": "prescricao-medica-upa24",
+  "versao": 1,
+  "aplicativo": {
+    "nome": "Prescrição Médica",
+    "versao": "1.0.0"
+  },
+  "ultimaAlteracao": "2026-08-06T00:00:00.000Z",
+  "unidade": "RIACHO GRANDE",
+  "paciente": {
+    "nome": "PACIENTE DE EXEMPLO",
+    "nascimento": "1985-06-21",
+    "idade": 41,
+    "telefones": "",
+    "alergias": "NEGA"
+  },
+  "atendimento": {
+    "data": "2026-08-06",
+    "diagnosticos": "DOR TORÁCICA",
+    "sala": "",
+    "leito": ""
+  },
+  "prescricao": [
+    {
+      "numero": 1,
+      "medicamento": "DIETA ZERO",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 2,
+      "medicamento": "AAS 300 MG",
+      "dose": "",
+      "via": "VO",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 3,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 4,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 5,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 6,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 7,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 8,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 9,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 10,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 11,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 12,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 13,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 14,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 15,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 16,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 17,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 18,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 19,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 20,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 21,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 22,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 23,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 24,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 25,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 26,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 27,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 28,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 29,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 30,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 31,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 32,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 33,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 34,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 35,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 36,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 37,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 38,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 39,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 40,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 41,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 42,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 43,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 44,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 45,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 46,
+      "medicamento": "",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    }
+  ],
+  "camposLaterais": {
+    "pagina1": {
+      "aprazamento": "",
+      "exames": ""
+    },
+    "pagina2": {
+      "aprazamento": "",
+      "exames": ""
+    }
+  }
+}
