@@ -7,6 +7,7 @@ if (document.getElementById('tspaciente') != null){
   const id_paciente = document.getElementById('tspaciente').innerHTML;
   const nome_medico = document.getElementById('ddprofis').innerHTML;
   const unidade = document.getElementById('Topo1_PageUS').innerHTML;
+  const nascimento = document.getElementById('griFichasGBCR__ctl2_tDataNasc').innerHTML;
   const nome_paciente = (function(){
   const el = document.getElementById('griFichasGBCR__ctl2_txtNomePac2');
   if(!el) return '';
@@ -20,12 +21,13 @@ if (document.getElementById('tspaciente') != null){
 
   // Define o nome do button
   buttonElement.innerHTML = 'Receituário';
-  buttonElement2.innerHTML = 'Chamar';
+  buttonElement2.innerHTML = 'Prescrição';
   buttonElement.target = '_blank';
+  buttonElement2.target = '_blank';
   buttonElement.classList.add("TLinkButtonN");
   buttonElement2.classList.add("TLinkButtonN");
   buttonElement.href = "https://llemesbarros.github.io/UPASBC/?unidade=" + unidade + "&id=" + id_paciente + "&nome=" + nome_paciente + "&medico=" + nome_medico ;
-  buttonElement2.href = "#";
+  buttonElement2.href = "https://llemesbarros.github.io/UPASBC/PRESCRICAO/?unidade=" + unidade + "&id=" + id_paciente + "&nome=" + nome_paciente + "&nascimento=" + nascimento;
 
   // Estiliza o button para que ele apareça de forma visível
   divElement.style.position = 'fixed';
@@ -40,52 +42,7 @@ if (document.getElementById('tspaciente') != null){
   divElement.appendChild(buttonElement);
   document.body.appendChild(divElement);
 
-  // Função para escolher voz pt-BR
-  function pickVoice() {
-    const voices = window.speechSynthesis.getVoices();
-    return (
-      voices.find(v => v.lang === 'pt-BR') ||
-      voices.find(v => (v.lang || '').toLowerCase().startsWith('pt')) ||
-      voices[0] ||
-      null
-    );
-  }
 
-  // Garante o carregamento das vozes em navegadores como Chrome
-  window.speechSynthesis.onvoiceschanged = () => pickVoice();
-
-  // Evento de clique para falar o nome do paciente (com voice picker e logs)
-(function(){
-  const hasTTS = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
-  if(!hasTTS){
-    console.warn('[TTS] Web Speech API não suportada.');
-    return;
-  }
-  function pickVoice(){
-    const voices = window.speechSynthesis.getVoices();
-    return voices.find(v=>v.lang==='pt-BR') || voices.find(v=>(v.lang||'').toLowerCase().startsWith('pt')) || voices[0] || null;
-  }
-  window.speechSynthesis.addEventListener('voiceschanged', ()=>{ /* aquece as vozes */ });
-  function speak(texto){
-    const t = (texto||'').trim();
-    if(!t){ console.warn('[TTS] Texto vazio.'); return; }
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(t);
-    u.lang = 'pt-BR';
-    const v = pickVoice();
-    if(v) u.voice = v;
-    u.rate = 1; u.pitch = 1; u.volume = 1;
-    window.speechSynthesis.speak(u);
-  }
-  buttonElement2.addEventListener('click', function(ev){
-    ev.preventDefault();
-    // Releia o nome no momento do clique (caso a tela tenha mudado)
-    const el = document.getElementById('griFichasGBCR__ctl2_txtNomePac2');
-    const t = el ? ((el.tagName||'').toUpperCase()==='INPUT'||(el.tagName||'').toUpperCase()==='TEXTAREA' ? (el.value||'') : (el.textContent||el.innerText||el.innerHTML||'')) : nome_paciente;
-    const d = document.createElement('div'); d.innerHTML = t; const txt = (d.textContent||d.innerText||'').trim();
-    speak(`${txt}, ${guiche}`);
-  });
-})();
 
   // Adiciona o link para exame físico padrão
   const txtExameFisico = document.getElementById("txtExameFisico");
