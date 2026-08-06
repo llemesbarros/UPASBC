@@ -52,6 +52,8 @@
     cursor: pointer;
   }
   button.primary { background: #1677d2; border-color: #1677d2; color: #fff; }
+  button.secondary { background: #16d277; border-color: #16d277; color: #fff; }
+  button.danger { background: red; border-color: red; color: #fff; }
   button:hover { filter: brightness(.97); }
 
   .sheet {
@@ -117,6 +119,40 @@
     white-space: nowrap;
     overflow: hidden;
   }
+
+  /* Campos de formulário dentro das células da identificação */
+  .patient-table .cell-field {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: 1mm;
+  }
+
+  .patient-table .cell-field > span {
+    flex: 0 0 auto;
+  }
+
+  .patient-table .cell-field > input {
+    flex: 1 1 auto;
+    min-width: 0;
+    width: 0;
+    height: 4mm;
+    padding: 0 .7mm;
+    border: 0;
+    border-bottom: .2mm solid #555;
+    background: transparent;
+    font: inherit;
+    font-weight: 700;
+    color: inherit;
+    outline: none;
+  }
+
+  .patient-table .cell-field > input:focus {
+    background: #fff9c9;
+    box-shadow: inset 0 0 0 .35mm #209554;
+  }
+
   .patient-table .center { text-align: center; }
   .patient-table .gray { background: var(--shade); }
 
@@ -230,7 +266,7 @@
       <button type="button" onclick="clearEditable()">Limpar campos editáveis</button>
       <button type="button" class="primary">Salvar</button>
       <button type="button" class="primary">Salvar como...</button>
-      <button type="button" class="primary" onclick="window.print()">Imprimir</button>
+      <button type="button" class="secondary" onclick="window.print()">Imprimir</button>
     </div>
   </div>
 
@@ -246,20 +282,19 @@
         <colgroup><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col></colgroup>
         <tbody>
           <tr>
-            <td colspan="6">NOME: <span class="editable" contenteditable="true" spellcheck="false"></span></td>
-            <td colspan="4" class="center">DATA: <span class="editable" contenteditable="true" spellcheck="false"></span></td>
-            <td colspan="6">TELEFONES: <span class="editable" contenteditable="true" spellcheck="false"></span></td>
+            <td colspan="6"><div class="cell-field"><span>NOME:</span><input type="text" name="nome" /></div></td>
+            <td colspan="4"><div class="cell-field"><span>DATA:</span><input type="date" name="data" /></div></td>
+            <td colspan="6"><div class="cell-field"><span>TELEFONES:</span><input type="text" name="telefones" /></div></td>
           </tr>
           <tr>
-            <td colspan="6">DATA NASCIMENTO: <span class="editable" contenteditable="true" spellcheck="false">21/06/1985</span></td>
-            <td colspan="4">IDADE: <span class="editable" contenteditable="true" spellcheck="false">41 ANOS</span></td>
-            <td colspan="2">ALERGIAS:</td>
-            <td colspan="4" class="editable" contenteditable="true" spellcheck="false">NEGA</td>
+            <td colspan="6"><div class="cell-field"><span>DATA NASCIMENTO:</span><input type="date" id="nascimento"/></div></td>
+            <td colspan="4">IDADE: <span id="idade"></span></td>
+            <td colspan="6"><div class="cell-field"><span>ALERGIAS:</span><input type="text" name="alergias"/></div></td>
           </tr>
           <tr>
-            <td colspan="8">DIAGNÓSTICO(S): <span class="editable" contenteditable="true" spellcheck="false">DOR TORACICA</span></td>
-            <td colspan="2">SALA: <span class="editable" contenteditable="true" spellcheck="false"></span></td>
-            <td colspan="6">LEITO: <span class="editable" contenteditable="true" spellcheck="false"></span></td>
+            <td colspan="8"><div class="cell-field"><span>DIAGNÓSTICO(S):</span><input type="text" name="diagnosticos"/></div></td>
+            <td colspan="2"><div class="cell-field"><span>SALA:</span><input type="text" name="sala"/></div></td>
+            <td colspan="6"><div class="cell-field"><span>LEITO:</span><input type="text" name="leito"/></div></td>
           </tr>
         </tbody>
       </table>
@@ -290,7 +325,7 @@
           <tr><td class="row-number">1</td><td class="editable med" contenteditable="true" spellcheck="false">Dieta Zero</td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable aprazamento" contenteditable="true" spellcheck="false" rowspan="5"></td></tr><tr><td class="row-number">2</td><td class="editable med" contenteditable="true" spellcheck="false">AAS300MG VO</td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false">E</td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">3</td><td class="editable med" contenteditable="true" spellcheck="false">OMEPRAZOL 40MG VO</td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">4</td><td class="editable med" contenteditable="true" spellcheck="false">AGUARDAR RESULTADO EXAMES NA UPA</td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">5</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">6</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="exam-label">EXAMES</td></tr><tr><td class="row-number">7</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable aprazamento" contenteditable="true" spellcheck="false" rowspan="14"></td></tr><tr><td class="row-number">8</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">9</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">10</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">11</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">12</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">13</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">14</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">15</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">16</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">17</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">18</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">19</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr><tr><td class="row-number">20</td><td class="editable med" contenteditable="true" spellcheck="false"></td><td class="editable dose" contenteditable="true" spellcheck="false"></td><td class="editable via" contenteditable="true" spellcheck="false"></td><td class="editable freq" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td><td class="editable time" contenteditable="true" spellcheck="false"></td></tr>
           <tr class="footer-row">
             <td class="no-border"></td>
-            <td colspan="9">Rua. Marcílio Conrado, 333 - RIACHO GRANDE - CNPJ. 66.508.640/0001-88.</td>
+            <td colspan="9" class="dados-unidade"></td>
           </tr>
         </tbody>
       </table>
