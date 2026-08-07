@@ -1,0 +1,75 @@
+{
+  "formato": "prescricao-medica-upa24",
+  "versao": 1,
+  "aplicativo": {
+    "nome": "Prescrição Médica",
+    "versao": "1.1.0"
+  },
+  "ultimaAlteracao": "2026-08-07T00:00:00.000Z",
+  "unidade": "UPA RUDGE RAMOS",
+  "paciente": {
+    "id": "9999999",
+    "nome": "ESTES DADOS NÃO DEVEM SER IMPORTADOS",
+    "nascimento": "2000-01-01",
+    "idade": "26 anos, 7 meses e 6 dias",
+    "telefones": "",
+    "alergias": "NEGA"
+  },
+  "atendimento": {
+    "data": "2026-08-07",
+    "diagnosticos": "CABEÇALHO DO MODELO NÃO DEVE SER IMPORTADO",
+    "sala": "X",
+    "leito": "Y"
+  },
+  "prescricao": [
+    {
+      "numero": 1,
+      "medicamento": "DIETA ZERO",
+      "dose": "",
+      "via": "",
+      "frequencia": "",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 2,
+      "medicamento": "AAS 300 MG",
+      "dose": "300 MG",
+      "via": "VO",
+      "frequencia": "AGORA",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    },
+    {
+      "numero": 3,
+      "medicamento": "OMEPRAZOL 40 MG",
+      "dose": "40 MG",
+      "via": "IV",
+      "frequencia": "AGORA",
+      "horarios": [
+        "",
+        "",
+        "",
+        ""
+      ]
+    }
+  ],
+  "camposLaterais": {
+    "pagina1": {
+      "aprazamento": "NÃO É IMPORTADO PELO BOTÃO MODELO",
+      "exames": "NÃO É IMPORTADO PELO BOTÃO MODELO"
+    },
+    "pagina2": {
+      "aprazamento": "",
+      "exames": ""
+    }
+  }
+}

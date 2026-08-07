@@ -3,14 +3,15 @@
   "versao": 1,
   "aplicativo": {
     "nome": "Prescrição Médica",
-    "versao": "1.0.0"
+    "versao": "1.1.0"
   },
   "ultimaAlteracao": "2026-08-06T00:00:00.000Z",
-  "unidade": "RIACHO GRANDE",
+  "unidade": "UPA RIACHO GRANDE",
   "paciente": {
+    "id": "1234567",
     "nome": "PACIENTE DE EXEMPLO",
     "nascimento": "1985-06-21",
-    "idade": 41,
+    "idade": "41 anos, 1 meses e 17 dias",
     "telefones": "",
     "alergias": "NEGA"
   },

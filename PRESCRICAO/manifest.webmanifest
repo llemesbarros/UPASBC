@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Prescrição Médica",
   "short_name": "Prescrição",
-  "description": "Editor local de prescrições médicas em arquivos .upa24.",
+  "description": "Editor local de prescrições médicas em arquivos .upa24, com importação de modelos.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",

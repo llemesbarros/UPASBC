@@ -1,10 +1,106 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.0.0';
+  const APP_VERSION = '1.1.0';
   const FILE_FORMAT = 'prescricao-medica-upa24';
   const FILE_EXTENSION = '.upa24';
   const FILE_MIME = 'application/json';
+  const MUNICIPAL_CNPJ = '46.523.239/0001-47';
+
+  // Mesma tabela de unidades usada no receituário UPASBC.
+  const UNIDADES = [
+    {
+      aliases: ['UPA RIACHO GRANDE', 'RIACHO GRANDE'],
+      nome: 'UPA RIACHO GRANDE',
+      endereco: 'Rua Marcílio Conrado, nº 333 - Bairro Riacho Grande',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '(11) 4357-2356',
+      cnes: '6650864',
+    },
+    {
+      aliases: ['UPA RUDGE RAMOS', 'RUDGE RAMOS'],
+      nome: 'UPA RUDGE RAMOS',
+      endereco: 'Rua Angela Tomé, nº 256 - Bairro Rudge Ramos',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '(11) 4368-1222',
+      cnes: '7030878',
+    },
+    {
+      aliases: ['UPA BAETA NEVES', 'BAETA NEVES'],
+      nome: 'UPA BAETA NEVES',
+      endereco: 'Rua dos Vianas, nº 933 - Baeta Neves',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '(11) 4125-9139',
+      cnes: '6844596',
+    },
+    {
+      aliases: [
+        'UPA ALVES DIAS/ASSUNÇÃO',
+        'UPA ALVES DIAS/ASSUNCAO',
+        'ALVES DIAS/ASSUNÇÃO',
+        'ALVES DIAS/ASSUNCAO',
+      ],
+      nome: 'UPA ALVES DIAS/ASSUNÇÃO',
+      endereco: 'Av. Humberto de Alencar Castelo Branco, nº 4220 - Alves Dias',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '(11) 4104-4018',
+      cnes: '7053835',
+    },
+    {
+      aliases: [
+        'UPA DEMARCHI/BATISTINI',
+        'UPA UPA DEMARCHI/BATISTINI',
+        'DEMARCHI/BATISTINI',
+      ],
+      nome: 'UPA DEMARCHI/BATISTINI',
+      endereco: 'Rua Valdomiro Luís, nº 303 - Demarchi',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '(11) 4368-4333',
+      cnes: '6535798',
+    },
+    {
+      aliases: [
+        'UPA PAULICEIA/TABOAO',
+        'UPA PAULICÉIA/TABOÃO',
+        'PAULICEIA/TABOAO',
+        'PAULICÉIA/TABOÃO',
+      ],
+      nome: 'UPA PAULICEIA/TABOAO',
+      endereco: 'Rua Pedro de Tolêdo, nº 326 - Paulicéia',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '',
+      cnes: '',
+    },
+    {
+      aliases: ['UPA SAO PEDRO', 'UPA SÃO PEDRO', 'SAO PEDRO', 'SÃO PEDRO'],
+      nome: 'UPA SAO PEDRO',
+      endereco: 'Av. Dom Pedro de Alcântara, nº 273 - Montanhão',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '',
+      cnes: '',
+    },
+    {
+      aliases: ['UPA SILVINA', 'SILVINA'],
+      nome: 'UPA SILVINA',
+      endereco: 'Av. Dr. José Fornari, nº 509 - Ferrazópolis',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '',
+      cnes: '',
+    },
+    {
+      aliases: [
+        'UPA UNIÃO/ALVARENGA',
+        'UPA UNIAO/ALVARENGA',
+        'UNIÃO/ALVARENGA',
+        'UNIAO/ALVARENGA',
+      ],
+      nome: 'UPA UNIÃO/ALVARENGA',
+      endereco: 'Estrada dos Alvarengas, nº 5779 - Alvarenga',
+      cidade: 'São Bernardo do Campo/SP',
+      telefone: '',
+      cnes: '',
+    },
+  ];
 
   const state = {
     currentFileHandle: null,
@@ -13,6 +109,7 @@
     busy: false,
     launchReceived: false,
     deferredInstallPrompt: null,
+    currentUnitValue: '',
   };
 
   const $ = (selector) => document.querySelector(selector);
@@ -22,11 +119,13 @@
     status: $('#document-status'),
     install: $('#install-button'),
     open: $('#open-button'),
+    importModel: $('#import-model-button'),
     clear: $('#clear-button'),
     save: $('#save-button'),
     saveAs: $('#save-as-button'),
     print: $('#print-button'),
     fallbackInput: $('#file-input-fallback'),
+    modelFallbackInput: $('#model-input-fallback'),
   };
 
   function localDateISO(date = new Date()) {
@@ -54,24 +153,78 @@
     return '';
   }
 
-  function calculateAge(birthDateValue) {
+  function daysInMonth(year, monthIndex) {
+    return new Date(year, monthIndex + 1, 0).getDate();
+  }
+
+  function addYearsClamped(date, years) {
+    const targetYear = date.getFullYear() + years;
+    const targetMonth = date.getMonth();
+    const targetDay = Math.min(date.getDate(), daysInMonth(targetYear, targetMonth));
+    return new Date(targetYear, targetMonth, targetDay);
+  }
+
+  function addMonthsClamped(date, months) {
+    const totalMonths = date.getMonth() + months;
+    const targetYear = date.getFullYear() + Math.floor(totalMonths / 12);
+    const targetMonth = ((totalMonths % 12) + 12) % 12;
+    const targetDay = Math.min(date.getDate(), daysInMonth(targetYear, targetMonth));
+    return new Date(targetYear, targetMonth, targetDay);
+  }
+
+  function calendarDayDifference(later, earlier) {
+    const laterUtc = Date.UTC(later.getFullYear(), later.getMonth(), later.getDate());
+    const earlierUtc = Date.UTC(earlier.getFullYear(), earlier.getMonth(), earlier.getDate());
+    return Math.floor((laterUtc - earlierUtc) / 86400000);
+  }
+
+  function calculateAgeParts(birthDateValue) {
     const normalized = normalizeDate(birthDateValue);
-    if (!normalized) return '';
+    if (!normalized) return null;
+
     const [year, month, day] = normalized.split('-').map(Number);
+    const birthDate = new Date(year, month - 1, day);
+    if (
+      birthDate.getFullYear() !== year ||
+      birthDate.getMonth() !== month - 1 ||
+      birthDate.getDate() !== day
+    ) {
+      return null;
+    }
+
     const today = new Date();
-    let age = today.getFullYear() - year;
-    const birthdayPending =
-      today.getMonth() + 1 < month ||
-      (today.getMonth() + 1 === month && today.getDate() < day);
-    if (birthdayPending) age -= 1;
-    return age >= 0 && age <= 130 ? String(age) : '';
+    today.setHours(0, 0, 0, 0);
+    birthDate.setHours(0, 0, 0, 0);
+    if (birthDate > today) return null;
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let yearAnchor = addYearsClamped(birthDate, years);
+    if (yearAnchor > today) {
+      years -= 1;
+      yearAnchor = addYearsClamped(birthDate, years);
+    }
+
+    if (years < 0 || years > 130) return null;
+
+    let months = 0;
+    while (months < 11 && addMonthsClamped(yearAnchor, months + 1) <= today) {
+      months += 1;
+    }
+
+    const monthAnchor = addMonthsClamped(yearAnchor, months);
+    const days = calendarDayDifference(today, monthAnchor);
+    return { years, months, days };
+  }
+
+  function calculateAge(birthDateValue) {
+    const age = calculateAgeParts(birthDateValue);
+    return age ? `${age.years} anos, ${age.months} meses e ${age.days} dias` : '';
   }
 
   function updateAge() {
     const birth = $('#nascimento')?.value || '';
-    const age = calculateAge(birth);
     const ageElement = $('#idade');
-    if (ageElement) ageElement.textContent = age ? `${age} ANOS` : '';
+    if (ageElement) ageElement.textContent = calculateAge(birth);
   }
 
   function getText(element) {
@@ -96,14 +249,54 @@
     element.value = value === null || value === undefined ? '' : String(value);
   }
 
+  function normalizeText(value) {
+    return String(value ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase();
+  }
+
+  function findUnit(value) {
+    const key = normalizeText(value);
+    if (!key) return null;
+    return (
+      UNIDADES.find((unit) =>
+        [unit.nome, ...unit.aliases].some((alias) => normalizeText(alias) === key),
+      ) || null
+    );
+  }
+
+  function shortUnitName(value) {
+    return String(value || '').replace(/^UPA\s+/i, '').trim();
+  }
+
+  function unitFooterText(unit, fallback = '') {
+    if (!unit) return String(fallback || '').trim();
+    return [unit.nome, unit.endereco, unit.cidade, `CNPJ: ${MUNICIPAL_CNPJ}`]
+      .filter(Boolean)
+      .join(' - ');
+  }
+
+  function updateUnitData(value) {
+    const unit = findUnit(value);
+    const footer = unitFooterText(unit, value);
+    $$('.dados-unidade').forEach((element) => setText(element, footer));
+  }
+
   function setUnit(value) {
     const text = value === null || value === undefined ? '' : String(value).trim();
     if (!text) return;
-    $$('.unidade').forEach((element) => setText(element, text));
+
+    const unit = findUnit(text);
+    state.currentUnitValue = unit?.nome || text;
+    const displayName = shortUnitName(unit?.nome || text);
+    $$('.unidade').forEach((element) => setText(element, displayName));
+    updateUnitData(state.currentUnitValue);
   }
 
   function getUnit() {
-    return getText($('.unidade'));
+    return state.currentUnitValue || getText($('.unidade'));
   }
 
   function rxRows() {
@@ -135,6 +328,7 @@
       ultimaAlteracao: new Date().toISOString(),
       unidade: getUnit(),
       paciente: {
+        id: getInput('id_paciente'),
         nome: getInput('nome'),
         nascimento: getInput('nascimento'),
         idade: calculateAge(getInput('nascimento')) || null,
@@ -166,7 +360,7 @@
     const unit = keepUnit ? getUnit() : '';
 
     $$('[contenteditable="true"]').forEach((element) => setText(element, ''));
-    $$('input:not(#file-input-fallback)').forEach((element) => {
+    $$('input:not([type="file"])').forEach((element) => {
       element.value = '';
     });
 
@@ -204,6 +398,25 @@
     }));
   }
 
+  function applyPrescriptionOnly(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+      throw new Error('O arquivo não contém um objeto JSON válido.');
+    }
+
+    const byNumber = new Map(normalizePrescriptionArray(data).map((entry) => [entry.numero, entry]));
+    for (const row of rxRows()) {
+      const number = Number(row.dataset.prescricaoNumero);
+      const entry = byNumber.get(number) || {};
+      setText(row.querySelector('.med'), entry.medicamento || '');
+      setText(row.querySelector('.dose'), entry.dose || '');
+      setText(row.querySelector('.via'), entry.via || '');
+      setText(row.querySelector('.freq'), entry.frequencia || '');
+      [...row.querySelectorAll('.time')].forEach((cell, index) => {
+        setText(cell, entry.horarios?.[index] || '');
+      });
+    }
+  }
+
   function applyDocumentData(data) {
     if (!data || typeof data !== 'object' || Array.isArray(data)) {
       throw new Error('O arquivo não contém um objeto JSON válido.');
@@ -211,9 +424,13 @@
 
     clearForm({ keepDate: false, keepUnit: true });
 
-    const unit = valueFrom(data, ['unidade', 'atendimento.unidade'], getUnit());
+    const unit = valueFrom(data, ['unidade.nome', 'unidade', 'atendimento.unidade'], getUnit());
     if (unit) setUnit(unit);
 
+    setInput(
+      'id_paciente',
+      valueFrom(data, ['paciente.id', 'paciente.id_paciente', 'paciente.hygia', 'id', 'id_paciente', 'hygia']),
+    );
     setInput('nome', valueFrom(data, ['paciente.nome', 'nome']));
     setInput(
       'nascimento',
@@ -295,7 +512,7 @@
 
   function setBusy(busy) {
     state.busy = busy;
-    [elements.open, elements.clear, elements.save, elements.saveAs].forEach((button) => {
+    [elements.open, elements.importModel, elements.clear, elements.save, elements.saveAs].forEach((button) => {
       if (button) button.disabled = busy;
     });
   }
@@ -461,6 +678,63 @@
     }
   }
 
+  async function loadModelHandle(handle) {
+    if (!handle) return;
+    setBusy(true);
+    try {
+      const file = await handle.getFile();
+      const data = JSON.parse(await file.text());
+      applyPrescriptionOnly(data);
+      state.dirty = true;
+      updateStatus(`Modelo importado: ${file.name || handle.name || 'arquivo .upa24'}`);
+    } catch (error) {
+      console.error(error);
+      alert(`Não foi possível importar o modelo .upa24.\n\n${error.message || error}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function loadFallbackModel(file) {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const data = JSON.parse(await file.text());
+      applyPrescriptionOnly(data);
+      state.dirty = true;
+      updateStatus(`Modelo importado: ${file.name}`);
+    } catch (error) {
+      console.error(error);
+      alert(`Não foi possível importar o modelo .upa24.\n\n${error.message || error}`);
+    } finally {
+      setBusy(false);
+      if (elements.modelFallbackInput) elements.modelFallbackInput.value = '';
+    }
+  }
+
+  async function importModelPicker() {
+    if (state.busy) return;
+
+    if (typeof window.showOpenFilePicker !== 'function') {
+      elements.modelFallbackInput?.click();
+      return;
+    }
+
+    try {
+      const [handle] = await window.showOpenFilePicker({
+        multiple: false,
+        types: filePickerTypes(),
+        excludeAcceptAllOption: false,
+      });
+      await loadModelHandle(handle);
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        console.error(error);
+        alert(`Não foi possível importar o modelo.\n\n${error.message || error}`);
+      }
+    }
+  }
+
   async function openFilePicker() {
     if (state.busy) return;
 
@@ -498,15 +772,17 @@
     const unit = getSearchParameterCaseInsensitive('UNIDADE');
     const name = getSearchParameterCaseInsensitive('NOME');
     const birth = getSearchParameterCaseInsensitive('NASCIMENTO');
+    const patientId = getSearchParameterCaseInsensitive('ID');
 
     if (unit) setUnit(unit);
+    if (patientId) setInput('id_paciente', patientId);
     if (name) setInput('nome', name);
     if (birth) setInput('nascimento', normalizeDate(birth));
     setInput('data', localDateISO());
     updateAge();
     state.dirty = false;
 
-    if (unit || name || birth) {
+    if (unit || patientId || name || birth) {
       updateStatus('Dados recebidos por GET — ainda não salvos em arquivo');
     } else {
       updateStatus('Novo documento');
@@ -521,6 +797,7 @@
 
   function bindEvents() {
     elements.open?.addEventListener('click', openFilePicker);
+    elements.importModel?.addEventListener('click', importModelPicker);
     elements.clear?.addEventListener('click', handleClear);
     elements.save?.addEventListener('click', saveCurrentFile);
     elements.saveAs?.addEventListener('click', saveFileAs);
@@ -528,11 +805,14 @@
     elements.fallbackInput?.addEventListener('change', (event) => {
       loadFallbackFile(event.target.files?.[0]);
     });
+    elements.modelFallbackInput?.addEventListener('change', (event) => {
+      loadFallbackModel(event.target.files?.[0]);
+    });
 
     $('#nascimento')?.addEventListener('input', updateAge);
 
     document.addEventListener('input', (event) => {
-      if (event.target.matches('input:not(#file-input-fallback), [contenteditable="true"]')) {
+      if (event.target.matches('input:not([type="file"]), [contenteditable="true"]')) {
         markDirty();
       }
     });
@@ -611,6 +891,7 @@
     // Defaults are applied first. A file launched by the operating system, if present,
     // is loaded afterward and takes precedence over URL parameters.
     setInput('data', localDateISO());
+    setUnit(getText($('.unidade')) || 'RIACHO GRANDE');
     updateAge();
     applyGetParameters();
   }

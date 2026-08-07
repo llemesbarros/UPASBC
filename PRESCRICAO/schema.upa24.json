@@ -29,6 +29,9 @@
     "paciente": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "nome": {
           "type": "string"
         },
@@ -37,9 +40,11 @@
         },
         "idade": {
           "type": [
+            "string",
             "integer",
             "null"
-          ]
+          ],
+          "description": "Idade calculada; versões atuais salvam no formato “xx anos, xx meses e xx dias”."
         },
         "telefones": {
           "type": "string"
