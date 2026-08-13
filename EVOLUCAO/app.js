@@ -4,7 +4,7 @@
   const EXTENSION = '.upa24';
   const ROWS_PER_PAGE = 20;
   const TOTAL_ROWS = 42;
-  const state = { handle: null, fileName: '', dirty: false, busy: false, source: {} };
+  const state = { handle: null, fileName: '', dirty: false, busy: false, source: {}, overlayObserver: null };
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
   const localDate = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
@@ -27,13 +27,12 @@
   function rows(start,count){
     return Array.from({length:count},(_,i)=>{
       const n=start+i;
-      const entryCell = i===0 ? `<td class="entry-continuous" rowspan="${count}" style="--rows:${count}"><label class="visually-hidden" for="evolucao-${start}">Evolução</label><div class="entry-lines" aria-hidden="true"></div><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></td>` : '';
-      return `<tr data-row="${n}"><td class="date-time"><label class="visually-hidden" for="datetime-${n}">Data e hora</label><input id="datetime-${n}" class="row-datetime" type="datetime-local"><span class="datetime-print" aria-hidden="true"></span></td>${entryCell}</tr>`;
+      return `<tr data-row="${n}"><td class="date-time"><label class="visually-hidden" for="datetime-${n}">Data e hora</label><input id="datetime-${n}" class="row-datetime" type="datetime-local"><span class="datetime-print" aria-hidden="true"></span></td><td class="entry-guide" aria-hidden="true"></td></tr>`;
     }).join('');
   }
 
   function page(number,start,count){
-    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}${number===2?'<tr><td class="footer" colspan="2">Rua Marcílio Conrado, 333 - RIACHO GRANDE - CNPJ 46.523.239/0001-47</td></tr>':''}</tbody></table></section>`;
+    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<div class="evolution-wrap" data-start="${start}" data-count="${count}"><table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}${number===2?'<tr><td class="footer" colspan="2">Rua Marcílio Conrado, 333 - RIACHO GRANDE - CNPJ 46.523.239/0001-47</td></tr>':''}</tbody></table><label class="visually-hidden" for="evolucao-${start}">Evolução</label><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></div></section>`;
   }
 
   $('#pages').innerHTML=page(1,0,ROWS_PER_PAGE)+page(2,ROWS_PER_PAGE,TOTAL_ROWS-ROWS_PER_PAGE);
@@ -55,34 +54,26 @@
     });
   }
 
-  function syncEntryLines(){
-    $$('.entry-continuous').forEach(cell=>{
-      const textarea=cell.querySelector('.page-evolution');
-      const layer=cell.querySelector('.entry-lines');
-      if(!textarea||!layer) return;
+  function syncEvolutionOverlays(){
+    $$('.page-evolution').forEach(textarea=>{
+      const wrap=textarea.closest('.evolution-wrap');
+      if(!wrap) return;
+      const guides=[...wrap.querySelectorAll('tr[data-row] .entry-guide')];
+      if(!guides.length) return;
 
-      const start=Number(textarea.dataset.start);
-      const count=Number(textarea.dataset.count);
-      const leftCells=Array.from({length:count},(_,i)=>document.querySelector(`tr[data-row="${start+i}"] .date-time`)).filter(Boolean);
-      if(leftCells.length<2) return;
+      const wrapRect=wrap.getBoundingClientRect();
+      const firstRect=guides[0].getBoundingClientRect();
+      const lastRect=guides[guides.length-1].getBoundingClientRect();
 
-      const layerRect=layer.getBoundingClientRect();
-      const borderWidth=Math.max(0.5,parseFloat(getComputedStyle(leftCells[0]).borderBottomWidth)||1);
-      layer.replaceChildren();
-
-      leftCells.slice(0,-1).forEach(leftCell=>{
-        const rect=leftCell.getBoundingClientRect();
-        const line=document.createElement('span');
-        line.className='entry-line';
-        line.style.top=`${rect.bottom-layerRect.top-borderWidth}px`;
-        line.style.height=`${borderWidth}px`;
-        layer.appendChild(line);
-      });
+      textarea.style.left=`${firstRect.left-wrapRect.left}px`;
+      textarea.style.top=`${firstRect.top-wrapRect.top}px`;
+      textarea.style.width=`${firstRect.width}px`;
+      textarea.style.height=`${lastRect.bottom-firstRect.top}px`;
     });
   }
 
-  function scheduleEntryLineSync(){
-    requestAnimationFrame(()=>requestAnimationFrame(syncEntryLines));
+  function scheduleEvolutionOverlaySync(){
+    requestAnimationFrame(()=>requestAnimationFrame(syncEvolutionOverlays));
   }
 
   function splitPageText(text,count){
@@ -99,7 +90,7 @@
     base.formatoOriginal=base.formato||null;
     base.formato=FORMAT;
     base.versaoEvolucao=2;
-    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.2.0'};
+    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.3.0'};
     base.ultimaAlteracao=new Date().toISOString();
     base.unidade=base.unidade||`UPA ${$('#unit-label').textContent}`;
     base.paciente={...(base.paciente||{}),nome:$('#nome').value,idade:$('#idade').value||base.paciente?.idade||null};
@@ -149,7 +140,7 @@
       t.value=lines.join('\n');
     });
     syncPrintDateTimes();
-    scheduleEntryLineSync();
+    scheduleEvolutionOverlaySync();
     state.dirty=false;
     setStatus();
   }
@@ -158,7 +149,7 @@
     if(state.dirty&&!confirm('Descartar as alterações não salvas?'))return;
     state.handle=null;state.fileName='';state.source={};
     $$('input:not([type=file]),textarea').forEach(e=>e.value='');
-    $('#unit-label').textContent='Riacho Grande';syncPrintDateTimes();scheduleEntryLineSync();state.dirty=false;setStatus();
+    $('#unit-label').textContent='Riacho Grande';syncPrintDateTimes();scheduleEvolutionOverlaySync();state.dirty=false;setStatus();
   }
 
   async function readFile(file,handle=null){
@@ -200,14 +191,18 @@
 
   document.addEventListener('input',e=>{if(e.target.matches('.row-datetime'))syncPrintDateTimes();markDirty();});
   $('#open-button').onclick=openFile;$('#clear-button').onclick=reset;$('#save-button').onclick=()=>save(false);$('#save-as-button').onclick=()=>save(true);
-  $('#print-button').onclick=()=>{syncPrintDateTimes();syncEntryLines();window.print();};
+  $('#print-button').onclick=()=>{syncPrintDateTimes();syncEvolutionOverlays();window.print();};
   $('#file-input').onchange=e=>{const f=e.target.files?.[0];if(f)readFile(f);e.target.value='';};
-  window.addEventListener('resize',scheduleEntryLineSync);
-  window.addEventListener('beforeprint',syncEntryLines);
-  window.addEventListener('afterprint',scheduleEntryLineSync);
+  window.addEventListener('resize',scheduleEvolutionOverlaySync);
+  window.addEventListener('beforeprint',syncEvolutionOverlays);
+  window.addEventListener('afterprint',scheduleEvolutionOverlaySync);
   window.addEventListener('beforeunload',e=>{if(state.dirty){e.preventDefault();e.returnValue='';}});
   if('launchQueue'in window)launchQueue.setConsumer(async params=>{const h=params.files?.[0];if(h)await readFile(await h.getFile(),h);});
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+  if('ResizeObserver'in window){
+    state.overlayObserver=new ResizeObserver(scheduleEvolutionOverlaySync);
+    $$('.evolution-wrap').forEach(w=>state.overlayObserver.observe(w));
+  }
   syncPrintDateTimes();
-  scheduleEntryLineSync();
+  scheduleEvolutionOverlaySync();
 })();
