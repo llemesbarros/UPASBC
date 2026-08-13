@@ -11,11 +11,37 @@
     body{margin:0}.toolbar{position:sticky;top:0;z-index:5;display:flex;gap:.55rem;align-items:center;flex-wrap:wrap;padding:.65rem 1rem;background:#173847;color:#fff;box-shadow:0 2px 8px #0004}.toolbar button{border:0;border-radius:.35rem;padding:.58rem .85rem;font-weight:700;cursor:pointer}.primary{background:#23a8d3;color:#fff}.danger{background:#ffe1e1;color:#7d1010}#document-status{margin-left:auto;font-size:.86rem}.unsaved{color:#ffd76b}
     .sheet{width:210mm;min-height:297mm;margin:10mm auto;background:#fff;padding:12mm 13mm 10mm;box-shadow:0 2px 14px #0003;page-break-after:always}.sheet:last-of-type{page-break-after:auto}
     table{width:100%;border-collapse:collapse;table-layout:fixed}td,th{border:var(--line)}.header td{height:7mm;text-align:center}.header .logo{width:40mm;height:28mm;padding:2mm}.header img{max-width:100%;max-height:23mm;object-fit:contain}.header .city{font-size:12pt;font-weight:700;letter-spacing:.22em}.header .secretary{font-weight:700;letter-spacing:.12em}.header .unit{background:#ddd;font-size:12pt;font-weight:700;line-height:1.35;letter-spacing:.12em}
-    .patient td{height:10mm;padding:1.5mm;font-size:10pt;font-weight:700;letter-spacing:.12em}.cell-field{display:flex;align-items:center;width:100%;min-width:0;gap:1mm}.cell-field>label{flex:0 0 auto;cursor:text}.cell-field>input{flex:1 1 auto;min-width:0;width:0;border:0;border-bottom:1px solid #777;font:inherit;text-transform:uppercase;background:transparent;outline:none;padding:0 .7mm}.patient .split{width:80%}.patient .small{width:20%}
-    .evolution th{height:8mm;background:#d6d6d6;font-size:10pt;letter-spacing:.18em}.evolution .datetime{width:42mm}.evolution tbody tr{height:var(--row-height)}.evolution tbody td{height:var(--row-height)}.date-time{padding:.7mm 1.2mm;vertical-align:middle}.date-time input{display:block;width:100%;border:0;background:transparent;font:8.5pt Arial}.datetime-print{display:none;font:8.5pt Arial;line-height:1.15;white-space:pre-line;text-align:center}.entry-continuous{padding:0;vertical-align:top;height:calc(var(--row-height) * var(--rows));position:relative;background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--row-height) - .25mm),#111 calc(var(--row-height) - .25mm),#111 var(--row-height))}.entry-continuous textarea{position:absolute;inset:0;width:100%;height:100%;border:0;resize:none;overflow:hidden;padding:1.2mm 1.5mm;background:transparent;font:9.5pt Arial;line-height:var(--row-height);outline:none;white-space:pre-wrap}.footer{height:6mm!important;border:0!important;text-align:center;font-size:7.5pt;padding-top:2mm!important}.page-two{--row-height:11.3mm}
-    input:focus,textarea:focus{outline:2px solid #36a9d4;outline-offset:-2px}.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+    .patient td{height:10mm;padding:1.5mm;font-size:10pt;font-weight:700;letter-spacing:.12em}.patient .split{width:80%}.patient .small{width:20%}
+    .patient .cell-field{display:flex;align-items:center;width:100%;min-width:0;gap:1mm}
+    .patient .cell-field>label{flex:0 0 auto;cursor:text}
+    .patient .cell-field>input{flex:1 1 auto;min-width:0;width:0;height:4mm;padding:0 .7mm;border:0;border-bottom:.2mm solid #555;background:transparent;font:inherit;font-weight:700;color:inherit;text-transform:uppercase;outline:none}
+    .patient .cell-field>input:focus{background:#fff9c9;box-shadow:inset 0 0 0 .35mm #209554}
+
+    .evolution th{height:8mm;background:#d6d6d6;font-size:10pt;letter-spacing:.18em}.evolution .datetime{width:42mm}
+    .evolution tbody tr{height:var(--row-height)}.evolution tbody td{height:var(--row-height)}
+    .date-time{position:relative;padding:0;vertical-align:middle;overflow:hidden}
+    .date-time .row-datetime{display:block;width:100%;height:100%;min-height:var(--row-height);margin:0;padding:0 1mm;border:0;background:transparent;font:8.5pt Arial;text-align:center;outline:none}
+    .date-time .row-datetime:focus{background:#fff9c9;box-shadow:inset 0 0 0 .35mm #209554}
+    .datetime-print{display:none;width:100%;height:100%;min-height:var(--row-height);align-items:center;justify-content:center;padding:0 1mm;font:8.5pt Arial;line-height:1.15;white-space:pre-line;text-align:center}
+
+    .entry-continuous{position:relative;height:calc(var(--row-height) * var(--rows));padding:0;vertical-align:top;overflow:hidden;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--row-height) - .25mm),#111 calc(var(--row-height) - .25mm),#111 var(--row-height));background-position:0 0;background-size:100% var(--row-height)}
+    .entry-continuous textarea{position:absolute;inset:0;display:block;width:100%;height:100%;margin:0;padding:0 1.5mm;border:0;resize:none;overflow:hidden;background:transparent;font:9.5pt Arial;line-height:var(--row-height);outline:none;white-space:pre-wrap}
+    .entry-continuous textarea:focus{background:rgba(255,249,201,.38);box-shadow:inset 0 0 0 .35mm #209554}
+
+    .footer{height:6mm!important;border:0!important;text-align:center;font-size:7.5pt;padding-top:2mm!important}.page-two{--row-height:11.3mm}
+    .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
     @media(max-width:850px){.sheet{margin:0;transform-origin:top left;box-shadow:none}.toolbar{position:relative}#document-status{width:100%;margin:0}}
-    @media print{@page{size:A4 portrait;margin:0}.toolbar{display:none}.sheet{margin:0;width:210mm;height:297mm;min-height:0;padding:12mm 13mm 10mm;box-shadow:none;overflow:hidden}.cell-field>input{border:0!important;box-shadow:none!important}.date-time input{display:none!important}.datetime-print{display:block!important}input,textarea{outline:0!important}.entry-continuous textarea{line-height:var(--row-height);padding-top:1.2mm}}
+    @media print{
+      @page{size:A4 portrait;margin:0}
+      .toolbar{display:none}
+      .sheet{margin:0;width:210mm;height:297mm;min-height:0;padding:12mm 13mm 10mm;box-shadow:none;overflow:hidden}
+      .patient .cell-field>input{border:0!important;box-shadow:none!important;background:transparent!important}
+      .date-time .row-datetime{display:none!important}
+      .datetime-print{display:flex!important}
+      .entry-continuous textarea{background:transparent!important;box-shadow:none!important}
+      input,textarea{outline:0!important}
+    }
   </style>
 </head>
 <body>
