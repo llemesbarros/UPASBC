@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Evolução Multidisciplinar UPA24",
+  "type": "object",
+  "required": ["formato", "evolucao"],
+  "properties": {
+    "formato": {"const": "evolucao-multidisciplinar-upa24"},
+    "versaoEvolucao": {"type": "integer", "minimum": 1},
+    "paciente": {"type": "object"},
+    "atendimento": {"type": "object"},
+    "evolucao": {"type": "array", "maxItems": 42, "items": {"type": "object", "required": ["numero", "data", "hora", "texto"], "properties": {"numero":{"type":"integer","minimum":1,"maximum":42},"data":{"type":"string"},"hora":{"type":"string"},"texto":{"type":"string"}}}}
+  },
+  "additionalProperties": true
+}
