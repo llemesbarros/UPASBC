@@ -27,7 +27,7 @@
   function rows(start,count){
     return Array.from({length:count},(_,i)=>{
       const n=start+i;
-      const entryCell = i===0 ? `<td class="entry-continuous" rowspan="${count}" style="--rows:${count}"><label class="visually-hidden" for="evolucao-${start}">Evolução</label><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></td>` : '';
+      const entryCell = i===0 ? `<td class="entry-continuous" rowspan="${count}" style="--rows:${count}"><label class="visually-hidden" for="evolucao-${start}">Evolução</label><div class="entry-lines" aria-hidden="true"></div><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></td>` : '';
       return `<tr data-row="${n}"><td class="date-time"><label class="visually-hidden" for="datetime-${n}">Data e hora</label><input id="datetime-${n}" class="row-datetime" type="datetime-local"><span class="datetime-print" aria-hidden="true"></span></td>${entryCell}</tr>`;
     }).join('');
   }
@@ -55,6 +55,36 @@
     });
   }
 
+  function syncEntryLines(){
+    $$('.entry-continuous').forEach(cell=>{
+      const textarea=cell.querySelector('.page-evolution');
+      const layer=cell.querySelector('.entry-lines');
+      if(!textarea||!layer) return;
+
+      const start=Number(textarea.dataset.start);
+      const count=Number(textarea.dataset.count);
+      const leftCells=Array.from({length:count},(_,i)=>document.querySelector(`tr[data-row="${start+i}"] .date-time`)).filter(Boolean);
+      if(leftCells.length<2) return;
+
+      const layerRect=layer.getBoundingClientRect();
+      const borderWidth=Math.max(0.5,parseFloat(getComputedStyle(leftCells[0]).borderBottomWidth)||1);
+      layer.replaceChildren();
+
+      leftCells.slice(0,-1).forEach(leftCell=>{
+        const rect=leftCell.getBoundingClientRect();
+        const line=document.createElement('span');
+        line.className='entry-line';
+        line.style.top=`${rect.bottom-layerRect.top-borderWidth}px`;
+        line.style.height=`${borderWidth}px`;
+        layer.appendChild(line);
+      });
+    });
+  }
+
+  function scheduleEntryLineSync(){
+    requestAnimationFrame(()=>requestAnimationFrame(syncEntryLines));
+  }
+
   function splitPageText(text,count){
     const lines=String(text||'').split(/\r?\n/);
     const out=Array.from({length:count},()=> '');
@@ -69,7 +99,7 @@
     base.formatoOriginal=base.formato||null;
     base.formato=FORMAT;
     base.versaoEvolucao=2;
-    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.0.0'};
+    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.2.0'};
     base.ultimaAlteracao=new Date().toISOString();
     base.unidade=base.unidade||`UPA ${$('#unit-label').textContent}`;
     base.paciente={...(base.paciente||{}),nome:$('#nome').value,idade:$('#idade').value||base.paciente?.idade||null};
@@ -119,6 +149,7 @@
       t.value=lines.join('\n');
     });
     syncPrintDateTimes();
+    scheduleEntryLineSync();
     state.dirty=false;
     setStatus();
   }
@@ -127,7 +158,7 @@
     if(state.dirty&&!confirm('Descartar as alterações não salvas?'))return;
     state.handle=null;state.fileName='';state.source={};
     $$('input:not([type=file]),textarea').forEach(e=>e.value='');
-    $('#unit-label').textContent='Riacho Grande';syncPrintDateTimes();state.dirty=false;setStatus();
+    $('#unit-label').textContent='Riacho Grande';syncPrintDateTimes();scheduleEntryLineSync();state.dirty=false;setStatus();
   }
 
   async function readFile(file,handle=null){
@@ -169,10 +200,14 @@
 
   document.addEventListener('input',e=>{if(e.target.matches('.row-datetime'))syncPrintDateTimes();markDirty();});
   $('#open-button').onclick=openFile;$('#clear-button').onclick=reset;$('#save-button').onclick=()=>save(false);$('#save-as-button').onclick=()=>save(true);
-  $('#print-button').onclick=()=>{syncPrintDateTimes();window.print();};
+  $('#print-button').onclick=()=>{syncPrintDateTimes();syncEntryLines();window.print();};
   $('#file-input').onchange=e=>{const f=e.target.files?.[0];if(f)readFile(f);e.target.value='';};
+  window.addEventListener('resize',scheduleEntryLineSync);
+  window.addEventListener('beforeprint',syncEntryLines);
+  window.addEventListener('afterprint',scheduleEntryLineSync);
   window.addEventListener('beforeunload',e=>{if(state.dirty){e.preventDefault();e.returnValue='';}});
   if('launchQueue'in window)launchQueue.setConsumer(async params=>{const h=params.files?.[0];if(h)await readFile(await h.getFile(),h);});
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(console.error);
   syncPrintDateTimes();
+  scheduleEntryLineSync();
 })();
