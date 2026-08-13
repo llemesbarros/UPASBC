@@ -4,6 +4,18 @@
   const EXTENSION = '.upa24';
   const ROWS_PER_PAGE = 20;
   const TOTAL_ROWS = 42;
+  const MUNICIPAL_CNPJ = '46.523.239/0001-47';
+  const UNIDADES = [
+    { aliases:['UPA RIACHO GRANDE','RIACHO GRANDE'], nome:'UPA RIACHO GRANDE', endereco:'Rua Marcílio Conrado, nº 333 - Bairro Riacho Grande', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA RUDGE RAMOS','RUDGE RAMOS'], nome:'UPA RUDGE RAMOS', endereco:'Rua Angela Tomé, nº 256 - Bairro Rudge Ramos', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA BAETA NEVES','BAETA NEVES'], nome:'UPA BAETA NEVES', endereco:'Rua dos Vianas, nº 933 - Baeta Neves', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA ALVES DIAS/ASSUNÇÃO','UPA ALVES DIAS/ASSUNCAO','ALVES DIAS/ASSUNÇÃO','ALVES DIAS/ASSUNCAO'], nome:'UPA ALVES DIAS/ASSUNÇÃO', endereco:'Av. Humberto de Alencar Castelo Branco, nº 4220 - Alves Dias', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA DEMARCHI/BATISTINI','UPA UPA DEMARCHI/BATISTINI','DEMARCHI/BATISTINI'], nome:'UPA DEMARCHI/BATISTINI', endereco:'Rua Valdomiro Luís, nº 303 - Demarchi', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA PAULICEIA/TABOAO','UPA PAULICÉIA/TABOÃO','PAULICEIA/TABOAO','PAULICÉIA/TABOÃO'], nome:'UPA PAULICEIA/TABOAO', endereco:'Rua Pedro de Tolêdo, nº 326 - Paulicéia', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA SAO PEDRO','UPA SÃO PEDRO','SAO PEDRO','SÃO PEDRO'], nome:'UPA SAO PEDRO', endereco:'Av. Dom Pedro de Alcântara, nº 273 - Montanhão', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA SILVINA','SILVINA'], nome:'UPA SILVINA', endereco:'Av. Dr. José Fornari, nº 509 - Ferrazópolis', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA UNIÃO/ALVARENGA','UPA UNIAO/ALVARENGA','UNIÃO/ALVARENGA','UNIAO/ALVARENGA'], nome:'UPA UNIÃO/ALVARENGA', endereco:'Estrada dos Alvarengas, nº 5779 - Alvarenga', cidade:'São Bernardo do Campo/SP' },
+  ];
   const state = { handle: null, fileName: '', dirty: false, busy: false, source: {} };
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
@@ -33,7 +45,7 @@
   }
 
   function page(number,start,count){
-    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}${number===2?'<tr><td class="footer" colspan="2">Rua Marcílio Conrado, 333 - RIACHO GRANDE - CNPJ 46.523.239/0001-47</td></tr>':''}</tbody></table></section>`;
+    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}<tr class="footer-row"><td class="dados-unidade" colspan="2"></td></tr></tbody></table></section>`;
   }
 
   $('#pages').innerHTML=page(1,0,ROWS_PER_PAGE)+page(2,ROWS_PER_PAGE,TOTAL_ROWS-ROWS_PER_PAGE);
@@ -45,7 +57,26 @@
     document.title=`Evolução Multidisciplinar${state.dirty?' *':''}`;
   }
   function markDirty(){ if(!state.busy){state.dirty=true;setStatus();} }
-  function normalizeUnit(v){ return String(v||'UPA RIACHO GRANDE').replace(/^UPA\s+/i,'').trim()||'Riacho Grande'; }
+  function normalizeText(value){ return String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase(); }
+  function findUnit(value){
+    const key=normalizeText(value);
+    if(!key) return null;
+    return UNIDADES.find(unit=>[unit.nome,...unit.aliases].some(alias=>normalizeText(alias)===key))||null;
+  }
+  function shortUnitName(value){ return String(value||'').replace(/^UPA\s+/i,'').trim(); }
+  function unitFooterText(unit,fallback=''){
+    if(!unit) return String(fallback||'').trim();
+    return [unit.nome,unit.endereco,unit.cidade,`CNPJ: ${MUNICIPAL_CNPJ}`].filter(Boolean).join(' - ');
+  }
+  function updateUnitPresentation(value){
+    const raw=String(value||'UPA RIACHO GRANDE').trim()||'UPA RIACHO GRANDE';
+    const unit=findUnit(raw);
+    const canonical=unit?.nome||raw;
+    const label=$('#unit-label');
+    if(label) label.textContent=shortUnitName(canonical)||'Riacho Grande';
+    const footer=unitFooterText(unit,canonical);
+    $$('.dados-unidade').forEach(element=>{element.textContent=footer;});
+  }
 
   function syncPrintDateTimes(){
     $$('tr[data-row]').forEach(r=>{
@@ -95,7 +126,7 @@
     $('#leito').value=valueAt(data,['atendimento.leito','leito']);
     $('#diagnosticos').value=valueAt(data,['atendimento.diagnosticos','atendimento.diagnostico','diagnosticos']);
     $('#idade').value=valueAt(data,['paciente.idade','idade']);
-    $('#unit-label').textContent=normalizeUnit(valueAt(data,['unidade.nome','unidade','atendimento.unidade']));
+    updateUnitPresentation(valueAt(data,['unidade.nome','unidade','atendimento.unidade'],'UPA RIACHO GRANDE'));
 
     const evol=Array.isArray(data.evolucao)?data.evolucao:Array.isArray(data.evolucoes)?data.evolucoes:[];
     $$('tr[data-row]').forEach((r,i)=>{
@@ -127,7 +158,7 @@
     if(state.dirty&&!confirm('Descartar as alterações não salvas?'))return;
     state.handle=null;state.fileName='';state.source={};
     $$('input:not([type=file]),textarea').forEach(e=>e.value='');
-    $('#unit-label').textContent='Riacho Grande';syncPrintDateTimes();state.dirty=false;setStatus();
+    updateUnitPresentation('UPA RIACHO GRANDE');syncPrintDateTimes();state.dirty=false;setStatus();
   }
 
   async function readFile(file,handle=null){
@@ -174,5 +205,6 @@
   window.addEventListener('beforeunload',e=>{if(state.dirty){e.preventDefault();e.returnValue='';}});
   if('launchQueue'in window)launchQueue.setConsumer(async params=>{const h=params.files?.[0];if(h)await readFile(await h.getFile(),h);});
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+  updateUnitPresentation('UPA RIACHO GRANDE');
   syncPrintDateTimes();
 })();
