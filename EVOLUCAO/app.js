@@ -4,6 +4,7 @@
   const EXTENSION = '.upa24';
   const ROWS_PER_PAGE = 20;
   const TOTAL_ROWS = 42;
+  const MAX_CHARS_PER_LINE = 70;
   const MUNICIPAL_CNPJ = '46.523.239/0001-47';
   const UNIDADES = [
     { aliases:['UPA RIACHO GRANDE','RIACHO GRANDE'], nome:'UPA RIACHO GRANDE', endereco:'Rua Marcílio Conrado, nº 333 - Bairro Riacho Grande', cidade:'São Bernardo do Campo/SP' },
@@ -45,7 +46,7 @@
   }
 
   function page(number,start,count){
-    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<div class="evolution-wrap" data-start="${start}" data-count="${count}"><table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}<tr class="footer-row"><td class="dados-unidade" colspan="2"></td></tr></tbody></table><label class="visually-hidden" for="evolucao-${start}">Evolução</label><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></div></section>`;
+    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<div class="evolution-wrap" data-start="${start}" data-count="${count}"><table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}<tr class="footer-row"><td class="dados-unidade" colspan="2"></td></tr></tbody></table><label class="visually-hidden" for="evolucao-${start}">Evolução</label><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" wrap="off" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></div></section>`;
   }
 
   $('#pages').innerHTML=page(1,0,ROWS_PER_PAGE)+page(2,ROWS_PER_PAGE,TOTAL_ROWS-ROWS_PER_PAGE);
@@ -64,9 +65,8 @@
     return UNIDADES.find(unit=>[unit.nome,...unit.aliases].some(alias=>normalizeText(alias)===key))||null;
   }
   function shortUnitName(value){ return String(value||'').replace(/^UPA\s+/i,'').trim(); }
-  function unitFooterText(unit,fallback=''){
-    if(!unit) return String(fallback||'').trim();
-    return [unit.nome,unit.endereco,unit.cidade,`CNPJ: ${MUNICIPAL_CNPJ}`].filter(Boolean).join(' - ');
+  function unitFooterText(unit){
+    return [unit?.endereco,unit?.cidade,`CNPJ: ${MUNICIPAL_CNPJ}`].filter(Boolean).join(' - ');
   }
   function updateUnitPresentation(value){
     const raw=String(value||'UPA RIACHO GRANDE').trim()||'UPA RIACHO GRANDE';
@@ -74,7 +74,7 @@
     const canonical=unit?.nome||raw;
     const label=$('#unit-label');
     if(label) label.textContent=shortUnitName(canonical)||'Riacho Grande';
-    const footer=unitFooterText(unit,canonical);
+    const footer=unitFooterText(unit);
     $$('.dados-unidade').forEach(element=>{element.textContent=footer;});
   }
 
@@ -108,21 +108,51 @@
     requestAnimationFrame(()=>requestAnimationFrame(syncEvolutionOverlays));
   }
 
+  function limitEvolutionText(value,maxLines){
+    const source=String(value??'').replace(/\r\n?/g,'\n');
+    const out=[];
+    for(const logicalLine of source.split('\n')){
+      if(logicalLine.length===0){
+        out.push('');
+      }else{
+        for(let i=0;i<logicalLine.length;i+=MAX_CHARS_PER_LINE){
+          out.push(logicalLine.slice(i,i+MAX_CHARS_PER_LINE));
+          if(out.length>=maxLines) break;
+        }
+      }
+      if(out.length>=maxLines) break;
+    }
+    return out.slice(0,maxLines).join('\n');
+  }
+
+  function enforceEvolutionLimit(textarea){
+    const maxLines=Number(textarea?.dataset?.count)||0;
+    if(!textarea||!maxLines) return;
+    const raw=textarea.value;
+    const limited=limitEvolutionText(raw,maxLines);
+    if(limited===raw) return;
+    const caret=textarea.selectionStart??raw.length;
+    const limitedBeforeCaret=limitEvolutionText(raw.slice(0,caret),maxLines);
+    textarea.value=limited;
+    const newCaret=Math.min(limitedBeforeCaret.length,limited.length);
+    textarea.setSelectionRange?.(newCaret,newCaret);
+  }
+
   function splitPageText(text,count){
-    const lines=String(text||'').split(/\r?\n/);
+    const lines=limitEvolutionText(text,count).split('\n');
     const out=Array.from({length:count},()=> '');
     for(let i=0;i<Math.min(lines.length,count);i++) out[i]=lines[i];
-    if(lines.length>count) out[count-1]+=(out[count-1]?'\n':'')+lines.slice(count).join('\n');
     return out;
   }
 
   function collect(){
     syncPrintDateTimes();
+    $$('.page-evolution').forEach(enforceEvolutionLimit);
     const base=cloneJson(state.source||{});
     base.formatoOriginal=base.formato||null;
     base.formato=FORMAT;
     base.versaoEvolucao=2;
-    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.1.2'};
+    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.1.3'};
     base.ultimaAlteracao=new Date().toISOString();
     base.unidade=base.unidade||`UPA ${$('#unit-label').textContent}`;
     base.paciente={
@@ -142,7 +172,7 @@
       const texto=(pageTexts[pageStart]||[])[i-pageStart]||'';
       return {numero:i+1,data,hora,datetime:dt,texto};
     });
-    base.evolucaoTextoPaginas=$$('.page-evolution').map((t,index)=>({pagina:index+1,texto:t.value}));
+    base.evolucaoTextoPaginas=$$('.page-evolution').map((t,index)=>({pagina:index+1,texto:limitEvolutionText(t.value,Number(t.dataset.count))}));
     return base;
   }
 
@@ -166,16 +196,17 @@
 
     const storedPages=Array.isArray(data.evolucaoTextoPaginas)?data.evolucaoTextoPaginas:[];
     $$('.page-evolution').forEach((t,pageIndex)=>{
+      const count=Number(t.dataset.count);
       const stored=storedPages.find(p=>Number(p.pagina)===pageIndex+1)?.texto;
-      if(stored!==undefined){ t.value=stored; return; }
-      const start=Number(t.dataset.start), count=Number(t.dataset.count);
+      if(stored!==undefined){ t.value=limitEvolutionText(stored,count); return; }
+      const start=Number(t.dataset.start);
       const lines=[];
       for(let i=0;i<count;i++){
         const e=evol.find(x=>Number(x.numero)===start+i+1)||evol[start+i]||{};
         lines.push(e.texto||e.evolucao||'');
       }
       while(lines.length && !lines[lines.length-1]) lines.pop();
-      t.value=lines.join('\n');
+      t.value=limitEvolutionText(lines.join('\n'),count);
     });
     syncPrintDateTimes();
     scheduleEvolutionOverlaySync();
@@ -231,7 +262,11 @@
     }catch(e){if(e.name!=='AbortError')alert(`Não foi possível salvar.\n\n${e.message}`);}
   }
 
-  document.addEventListener('input',e=>{if(e.target.matches('.row-datetime'))syncPrintDateTimes();markDirty();});
+  document.addEventListener('input',e=>{
+    if(e.target.matches('.row-datetime')) syncPrintDateTimes();
+    if(e.target.matches('.page-evolution')) enforceEvolutionLimit(e.target);
+    markDirty();
+  });
   $('#open-button').onclick=openFile;$('#clear-button').onclick=reset;$('#save-button').onclick=()=>save(false);$('#save-as-button').onclick=()=>save(true);
   $('#print-button').onclick=()=>{syncPrintDateTimes();syncEvolutionOverlays();window.print();};
   $('#file-input').onchange=e=>{const f=e.target.files?.[0];if(f)readFile(f);e.target.value='';};
