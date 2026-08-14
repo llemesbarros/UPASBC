@@ -1,110 +1,33 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.1.0';
+  const APP_VERSION = '1.1.1';
   const FILE_FORMAT = 'prescricao-medica-upa24';
   const FILE_EXTENSION = '.upa24';
   const FILE_MIME = 'application/json';
   const MUNICIPAL_CNPJ = '46.523.239/0001-47';
+  const HANDOFF_SESSION_KEY = 'upa24-handoff-prescricao-evolucao';
+  const HANDLE_DB_NAME = 'upa24-shared-file-handles';
+  const HANDLE_DB_VERSION = 1;
+  const HANDLE_STORE_NAME = 'handles';
+  const HANDLE_KEY = 'prescricao-evolucao-current';
 
-  // Mesma tabela de unidades usada no receituário UPASBC.
   const UNIDADES = [
-    {
-      aliases: ['UPA RIACHO GRANDE', 'RIACHO GRANDE'],
-      nome: 'UPA RIACHO GRANDE',
-      endereco: 'Rua Marcílio Conrado, nº 333 - Bairro Riacho Grande',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '(11) 4357-2356',
-      cnes: '6650864',
-    },
-    {
-      aliases: ['UPA RUDGE RAMOS', 'RUDGE RAMOS'],
-      nome: 'UPA RUDGE RAMOS',
-      endereco: 'Rua Angela Tomé, nº 256 - Bairro Rudge Ramos',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '(11) 4368-1222',
-      cnes: '7030878',
-    },
-    {
-      aliases: ['UPA BAETA NEVES', 'BAETA NEVES'],
-      nome: 'UPA BAETA NEVES',
-      endereco: 'Rua dos Vianas, nº 933 - Baeta Neves',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '(11) 4125-9139',
-      cnes: '6844596',
-    },
-    {
-      aliases: [
-        'UPA ALVES DIAS/ASSUNÇÃO',
-        'UPA ALVES DIAS/ASSUNCAO',
-        'ALVES DIAS/ASSUNÇÃO',
-        'ALVES DIAS/ASSUNCAO',
-      ],
-      nome: 'UPA ALVES DIAS/ASSUNÇÃO',
-      endereco: 'Av. Humberto de Alencar Castelo Branco, nº 4220 - Alves Dias',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '(11) 4104-4018',
-      cnes: '7053835',
-    },
-    {
-      aliases: [
-        'UPA DEMARCHI/BATISTINI',
-        'UPA UPA DEMARCHI/BATISTINI',
-        'DEMARCHI/BATISTINI',
-      ],
-      nome: 'UPA DEMARCHI/BATISTINI',
-      endereco: 'Rua Valdomiro Luís, nº 303 - Demarchi',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '(11) 4368-4333',
-      cnes: '6535798',
-    },
-    {
-      aliases: [
-        'UPA PAULICEIA/TABOAO',
-        'UPA PAULICÉIA/TABOÃO',
-        'PAULICEIA/TABOAO',
-        'PAULICÉIA/TABOÃO',
-      ],
-      nome: 'UPA PAULICEIA/TABOAO',
-      endereco: 'Rua Pedro de Tolêdo, nº 326 - Paulicéia',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '',
-      cnes: '',
-    },
-    {
-      aliases: ['UPA SAO PEDRO', 'UPA SÃO PEDRO', 'SAO PEDRO', 'SÃO PEDRO'],
-      nome: 'UPA SAO PEDRO',
-      endereco: 'Av. Dom Pedro de Alcântara, nº 273 - Montanhão',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '',
-      cnes: '',
-    },
-    {
-      aliases: ['UPA SILVINA', 'SILVINA'],
-      nome: 'UPA SILVINA',
-      endereco: 'Av. Dr. José Fornari, nº 509 - Ferrazópolis',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '',
-      cnes: '',
-    },
-    {
-      aliases: [
-        'UPA UNIÃO/ALVARENGA',
-        'UPA UNIAO/ALVARENGA',
-        'UNIÃO/ALVARENGA',
-        'UNIAO/ALVARENGA',
-      ],
-      nome: 'UPA UNIÃO/ALVARENGA',
-      endereco: 'Estrada dos Alvarengas, nº 5779 - Alvarenga',
-      cidade: 'São Bernardo do Campo/SP',
-      telefone: '',
-      cnes: '',
-    },
+    { aliases: ['UPA RIACHO GRANDE', 'RIACHO GRANDE'], nome: 'UPA RIACHO GRANDE', endereco: 'Rua Marcílio Conrado, nº 333 - Bairro Riacho Grande', cidade: 'São Bernardo do Campo/SP', telefone: '(11) 4357-2356', cnes: '6650864' },
+    { aliases: ['UPA RUDGE RAMOS', 'RUDGE RAMOS'], nome: 'UPA RUDGE RAMOS', endereco: 'Rua Angela Tomé, nº 256 - Bairro Rudge Ramos', cidade: 'São Bernardo do Campo/SP', telefone: '(11) 4368-1222', cnes: '7030878' },
+    { aliases: ['UPA BAETA NEVES', 'BAETA NEVES'], nome: 'UPA BAETA NEVES', endereco: 'Rua dos Vianas, nº 933 - Baeta Neves', cidade: 'São Bernardo do Campo/SP', telefone: '(11) 4125-9139', cnes: '6844596' },
+    { aliases: ['UPA ALVES DIAS/ASSUNÇÃO', 'UPA ALVES DIAS/ASSUNCAO', 'ALVES DIAS/ASSUNÇÃO', 'ALVES DIAS/ASSUNCAO'], nome: 'UPA ALVES DIAS/ASSUNÇÃO', endereco: 'Av. Humberto de Alencar Castelo Branco, nº 4220 - Alves Dias', cidade: 'São Bernardo do Campo/SP', telefone: '(11) 4104-4018', cnes: '7053835' },
+    { aliases: ['UPA DEMARCHI/BATISTINI', 'UPA UPA DEMARCHI/BATISTINI', 'DEMARCHI/BATISTINI'], nome: 'UPA DEMARCHI/BATISTINI', endereco: 'Rua Valdomiro Luís, nº 303 - Demarchi', cidade: 'São Bernardo do Campo/SP', telefone: '(11) 4368-4333', cnes: '6535798' },
+    { aliases: ['UPA PAULICEIA/TABOAO', 'UPA PAULICÉIA/TABOÃO', 'PAULICEIA/TABOAO', 'PAULICÉIA/TABOÃO'], nome: 'UPA PAULICEIA/TABOAO', endereco: 'Rua Pedro de Tolêdo, nº 326 - Paulicéia', cidade: 'São Bernardo do Campo/SP', telefone: '', cnes: '' },
+    { aliases: ['UPA SAO PEDRO', 'UPA SÃO PEDRO', 'SAO PEDRO', 'SÃO PEDRO'], nome: 'UPA SAO PEDRO', endereco: 'Av. Dom Pedro de Alcântara, nº 273 - Montanhão', cidade: 'São Bernardo do Campo/SP', telefone: '', cnes: '' },
+    { aliases: ['UPA SILVINA', 'SILVINA'], nome: 'UPA SILVINA', endereco: 'Av. Dr. José Fornari, nº 509 - Ferrazópolis', cidade: 'São Bernardo do Campo/SP', telefone: '', cnes: '' },
+    { aliases: ['UPA UNIÃO/ALVARENGA', 'UPA UNIAO/ALVARENGA', 'UNIÃO/ALVARENGA', 'UNIAO/ALVARENGA'], nome: 'UPA UNIÃO/ALVARENGA', endereco: 'Estrada dos Alvarengas, nº 5779 - Alvarenga', cidade: 'São Bernardo do Campo/SP', telefone: '', cnes: '' },
   ];
 
   const state = {
     currentFileHandle: null,
     currentFileName: '',
+    sourceData: {},
     dirty: false,
     busy: false,
     launchReceived: false,
@@ -114,6 +37,7 @@
 
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];
+  const cloneJson = (value) => JSON.parse(JSON.stringify(value ?? {}));
 
   const elements = {
     status: $('#document-status'),
@@ -124,33 +48,25 @@
     save: $('#save-button'),
     saveAs: $('#save-as-button'),
     print: $('#print-button'),
+    evolution: null,
     fallbackInput: $('#file-input-fallback'),
     modelFallbackInput: $('#model-input-fallback'),
   };
 
   function localDateISO(date = new Date()) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
   function normalizeDate(value) {
     if (value === null || value === undefined) return '';
     const raw = String(value).trim();
     if (!raw) return '';
-
     const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
     if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
-
     const br = raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
-    if (br) {
-      return `${br[3]}-${br[2].padStart(2, '0')}-${br[1].padStart(2, '0')}`;
-    }
-
+    if (br) return `${br[3]}-${br[2].padStart(2, '0')}-${br[1].padStart(2, '0')}`;
     const parsed = new Date(raw);
-    if (!Number.isNaN(parsed.getTime())) return localDateISO(parsed);
-    return '';
+    return Number.isNaN(parsed.getTime()) ? '' : localDateISO(parsed);
   }
 
   function daysInMonth(year, monthIndex) {
@@ -158,81 +74,58 @@
   }
 
   function addYearsClamped(date, years) {
-    const targetYear = date.getFullYear() + years;
-    const targetMonth = date.getMonth();
-    const targetDay = Math.min(date.getDate(), daysInMonth(targetYear, targetMonth));
-    return new Date(targetYear, targetMonth, targetDay);
+    const year = date.getFullYear() + years;
+    const month = date.getMonth();
+    return new Date(year, month, Math.min(date.getDate(), daysInMonth(year, month)));
   }
 
   function addMonthsClamped(date, months) {
-    const totalMonths = date.getMonth() + months;
-    const targetYear = date.getFullYear() + Math.floor(totalMonths / 12);
-    const targetMonth = ((totalMonths % 12) + 12) % 12;
-    const targetDay = Math.min(date.getDate(), daysInMonth(targetYear, targetMonth));
-    return new Date(targetYear, targetMonth, targetDay);
+    const total = date.getMonth() + months;
+    const year = date.getFullYear() + Math.floor(total / 12);
+    const month = ((total % 12) + 12) % 12;
+    return new Date(year, month, Math.min(date.getDate(), daysInMonth(year, month)));
   }
 
   function calendarDayDifference(later, earlier) {
-    const laterUtc = Date.UTC(later.getFullYear(), later.getMonth(), later.getDate());
-    const earlierUtc = Date.UTC(earlier.getFullYear(), earlier.getMonth(), earlier.getDate());
-    return Math.floor((laterUtc - earlierUtc) / 86400000);
+    return Math.floor((Date.UTC(later.getFullYear(), later.getMonth(), later.getDate()) - Date.UTC(earlier.getFullYear(), earlier.getMonth(), earlier.getDate())) / 86400000);
   }
 
-  function calculateAgeParts(birthDateValue) {
-    const normalized = normalizeDate(birthDateValue);
+  function calculateAgeParts(value) {
+    const normalized = normalizeDate(value);
     if (!normalized) return null;
-
     const [year, month, day] = normalized.split('-').map(Number);
-    const birthDate = new Date(year, month - 1, day);
-    if (
-      birthDate.getFullYear() !== year ||
-      birthDate.getMonth() !== month - 1 ||
-      birthDate.getDate() !== day
-    ) {
-      return null;
-    }
-
+    const birth = new Date(year, month - 1, day);
+    if (birth.getFullYear() !== year || birth.getMonth() !== month - 1 || birth.getDate() !== day) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    birthDate.setHours(0, 0, 0, 0);
-    if (birthDate > today) return null;
-
-    let years = today.getFullYear() - birthDate.getFullYear();
-    let yearAnchor = addYearsClamped(birthDate, years);
+    birth.setHours(0, 0, 0, 0);
+    if (birth > today) return null;
+    let years = today.getFullYear() - birth.getFullYear();
+    let yearAnchor = addYearsClamped(birth, years);
     if (yearAnchor > today) {
       years -= 1;
-      yearAnchor = addYearsClamped(birthDate, years);
+      yearAnchor = addYearsClamped(birth, years);
     }
-
     if (years < 0 || years > 130) return null;
-
     let months = 0;
-    while (months < 11 && addMonthsClamped(yearAnchor, months + 1) <= today) {
-      months += 1;
-    }
-
+    while (months < 11 && addMonthsClamped(yearAnchor, months + 1) <= today) months += 1;
     const monthAnchor = addMonthsClamped(yearAnchor, months);
-    const days = calendarDayDifference(today, monthAnchor);
-    return { years, months, days };
+    return { years, months, days: calendarDayDifference(today, monthAnchor) };
   }
 
-  function calculateAge(birthDateValue) {
-    const age = calculateAgeParts(birthDateValue);
+  function calculateAge(value) {
+    const age = calculateAgeParts(value);
     return age ? `${age.years} anos, ${age.months} meses e ${age.days} dias` : '';
   }
 
   function updateAge() {
-    const birth = $('#nascimento')?.value || '';
-    const ageElement = $('#idade');
-    if (ageElement) ageElement.textContent = calculateAge(birth);
+    const age = $('#idade');
+    if (age) age.textContent = calculateAge($('#nascimento')?.value || '');
   }
 
   function getText(element) {
     if (!element) return '';
-    return (element.innerText || element.textContent || '')
-      .replace(/\u00a0/g, ' ')
-      .replace(/\r\n?/g, '\n')
-      .trim();
+    return (element.innerText || element.textContent || '').replace(/\u00a0/g, ' ').replace(/\r\n?/g, '\n').trim();
   }
 
   function setText(element, value) {
@@ -245,26 +138,17 @@
 
   function setInput(id, value) {
     const element = document.getElementById(id);
-    if (!element) return;
-    element.value = value === null || value === undefined ? '' : String(value);
+    if (element) element.value = value === null || value === undefined ? '' : String(value);
   }
 
   function normalizeText(value) {
-    return String(value ?? '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .trim()
-      .toUpperCase();
+    return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
   }
 
   function findUnit(value) {
     const key = normalizeText(value);
     if (!key) return null;
-    return (
-      UNIDADES.find((unit) =>
-        [unit.nome, ...unit.aliases].some((alias) => normalizeText(alias) === key),
-      ) || null
-    );
+    return UNIDADES.find((unit) => [unit.nome, ...unit.aliases].some((alias) => normalizeText(alias) === key)) || null;
   }
 
   function shortUnitName(value) {
@@ -273,9 +157,7 @@
 
   function unitFooterText(unit, fallback = '') {
     if (!unit) return String(fallback || '').trim();
-    return [unit.nome, unit.endereco, unit.cidade, `CNPJ: ${MUNICIPAL_CNPJ}`]
-      .filter(Boolean)
-      .join(' - ');
+    return [unit.nome, unit.endereco, unit.cidade, `CNPJ: ${MUNICIPAL_CNPJ}`].filter(Boolean).join(' - ');
   }
 
   function updateUnitData(value) {
@@ -287,11 +169,9 @@
   function setUnit(value) {
     const text = value === null || value === undefined ? '' : String(value).trim();
     if (!text) return;
-
     const unit = findUnit(text);
     state.currentUnitValue = unit?.nome || text;
-    const displayName = shortUnitName(unit?.nome || text);
-    $$('.unidade').forEach((element) => setText(element, displayName));
+    $$('.unidade').forEach((element) => setText(element, shortUnitName(unit?.nome || text)));
     updateUnitData(state.currentUnitValue);
   }
 
@@ -300,9 +180,7 @@
   }
 
   function rxRows() {
-    return $$('tr[data-prescricao-numero]').sort(
-      (a, b) => Number(a.dataset.prescricaoNumero) - Number(b.dataset.prescricaoNumero),
-    );
+    return $$('tr[data-prescricao-numero]').sort((a, b) => Number(a.dataset.prescricaoNumero) - Number(b.dataset.prescricaoNumero));
   }
 
   function collectPrescriptionRows() {
@@ -318,52 +196,42 @@
 
   function collectDocumentData() {
     updateAge();
-    return {
-      formato: FILE_FORMAT,
-      versao: 1,
-      aplicativo: {
-        nome: 'Prescrição Médica',
-        versao: APP_VERSION,
-      },
-      ultimaAlteracao: new Date().toISOString(),
-      unidade: getUnit(),
-      paciente: {
-        id: getInput('id_paciente'),
-        nome: getInput('nome'),
-        nascimento: getInput('nascimento'),
-        idade: calculateAge(getInput('nascimento')) || null,
-        telefones: getInput('telefones'),
-        alergias: getInput('alergias'),
-      },
-      atendimento: {
-        data: getInput('data'),
-        diagnosticos: getInput('diagnosticos'),
-        sala: getInput('sala'),
-        leito: getInput('leito'),
-      },
-      prescricao: collectPrescriptionRows(),
-      camposLaterais: {
-        pagina1: {
-          aprazamento: getText($('#aprazamento-p1')),
-          exames: getText($('#exames-p1')),
-        },
-        pagina2: {
-          aprazamento: getText($('#aprazamento-p2')),
-          exames: getText($('#exames-p2')),
-        },
-      },
+    const base = cloneJson(state.sourceData);
+    if (base.formato && base.formato !== FILE_FORMAT && !base.formatoOriginal) base.formatoOriginal = base.formato;
+    base.formato = FILE_FORMAT;
+    base.versao = 1;
+    base.aplicativo = { nome: 'Prescrição Médica', versao: APP_VERSION };
+    base.ultimaAlteracao = new Date().toISOString();
+    base.unidade = getUnit();
+    base.paciente = {
+      ...(base.paciente || {}),
+      id: getInput('id_paciente'),
+      nome: getInput('nome'),
+      nascimento: getInput('nascimento'),
+      idade: calculateAge(getInput('nascimento')) || null,
+      telefones: getInput('telefones'),
+      alergias: getInput('alergias'),
     };
+    base.atendimento = {
+      ...(base.atendimento || {}),
+      data: getInput('data'),
+      diagnosticos: getInput('diagnosticos'),
+      sala: getInput('sala'),
+      leito: getInput('leito'),
+    };
+    base.prescricao = collectPrescriptionRows();
+    base.camposLaterais = {
+      pagina1: { aprazamento: getText($('#aprazamento-p1')), exames: getText($('#exames-p1')) },
+      pagina2: { aprazamento: getText($('#aprazamento-p2')), exames: getText($('#exames-p2')) },
+    };
+    return base;
   }
 
   function clearForm({ keepDate = true, keepUnit = true } = {}) {
     const date = keepDate ? getInput('data') || localDateISO() : '';
     const unit = keepUnit ? getUnit() : '';
-
     $$('[contenteditable="true"]').forEach((element) => setText(element, ''));
-    $$('input:not([type="file"])').forEach((element) => {
-      element.value = '';
-    });
-
+    $$('input:not([type="file"])').forEach((element) => { element.value = ''; });
     if (keepDate) setInput('data', date);
     if (keepUnit && unit) setUnit(unit);
     updateAge();
@@ -378,141 +246,80 @@
   }
 
   function normalizePrescriptionArray(data) {
-    const entries = Array.isArray(data?.prescricao)
-      ? data.prescricao
-      : Array.isArray(data?.prescricoes)
-        ? data.prescricoes
-        : [];
-
+    const entries = Array.isArray(data?.prescricao) ? data.prescricao : Array.isArray(data?.prescricoes) ? data.prescricoes : [];
     return entries.map((entry, index) => ({
       numero: Number(entry?.numero ?? index + 1),
       medicamento: entry?.medicamento ?? entry?.nome ?? '',
       dose: entry?.dose ?? '',
       via: entry?.via ?? '',
       frequencia: entry?.frequencia ?? entry?.frequência ?? '',
-      horarios: Array.isArray(entry?.horarios)
-        ? entry.horarios
-        : Array.isArray(entry?.horários)
-          ? entry.horários
-          : [],
+      horarios: Array.isArray(entry?.horarios) ? entry.horarios : Array.isArray(entry?.horários) ? entry.horários : [],
     }));
   }
 
   function applyPrescriptionOnly(data) {
-    if (!data || typeof data !== 'object' || Array.isArray(data)) {
-      throw new Error('O arquivo não contém um objeto JSON válido.');
-    }
-
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('O arquivo não contém um objeto JSON válido.');
     const byNumber = new Map(normalizePrescriptionArray(data).map((entry) => [entry.numero, entry]));
     for (const row of rxRows()) {
-      const number = Number(row.dataset.prescricaoNumero);
-      const entry = byNumber.get(number) || {};
+      const entry = byNumber.get(Number(row.dataset.prescricaoNumero)) || {};
       setText(row.querySelector('.med'), entry.medicamento || '');
       setText(row.querySelector('.dose'), entry.dose || '');
       setText(row.querySelector('.via'), entry.via || '');
       setText(row.querySelector('.freq'), entry.frequencia || '');
-      [...row.querySelectorAll('.time')].forEach((cell, index) => {
-        setText(cell, entry.horarios?.[index] || '');
-      });
+      [...row.querySelectorAll('.time')].forEach((cell, index) => setText(cell, entry.horarios?.[index] || ''));
     }
   }
 
   function applyDocumentData(data) {
-    if (!data || typeof data !== 'object' || Array.isArray(data)) {
-      throw new Error('O arquivo não contém um objeto JSON válido.');
-    }
-
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('O arquivo não contém um objeto JSON válido.');
+    state.sourceData = cloneJson(data);
     clearForm({ keepDate: false, keepUnit: true });
-
     const unit = valueFrom(data, ['unidade.nome', 'unidade', 'atendimento.unidade'], getUnit());
     if (unit) setUnit(unit);
-
-    setInput(
-      'id_paciente',
-      valueFrom(data, ['paciente.id', 'paciente.id_paciente', 'paciente.hygia', 'id', 'id_paciente', 'hygia']),
-    );
+    setInput('id_paciente', valueFrom(data, ['paciente.id', 'paciente.id_paciente', 'paciente.hygia', 'id', 'id_paciente', 'hygia']));
     setInput('nome', valueFrom(data, ['paciente.nome', 'nome']));
-    setInput(
-      'nascimento',
-      normalizeDate(valueFrom(data, ['paciente.nascimento', 'paciente.dataNascimento', 'nascimento'])),
-    );
+    setInput('nascimento', normalizeDate(valueFrom(data, ['paciente.nascimento', 'paciente.dataNascimento', 'nascimento'])));
     setInput('telefones', valueFrom(data, ['paciente.telefones', 'paciente.telefone', 'telefones']));
     setInput('alergias', valueFrom(data, ['paciente.alergias', 'alergias']));
-
-    const savedDate = normalizeDate(
-      valueFrom(data, ['atendimento.data', 'atendimento.dataHora', 'data']),
-    );
+    const savedDate = normalizeDate(valueFrom(data, ['atendimento.data', 'atendimento.dataHora', 'data']));
     setInput('data', savedDate || localDateISO());
-    setInput(
-      'diagnosticos',
-      valueFrom(data, ['atendimento.diagnosticos', 'atendimento.diagnostico', 'diagnosticos']),
-    );
+    setInput('diagnosticos', valueFrom(data, ['atendimento.diagnosticos', 'atendimento.diagnostico', 'diagnosticos']));
     setInput('sala', valueFrom(data, ['atendimento.sala', 'sala']));
     setInput('leito', valueFrom(data, ['atendimento.leito', 'leito']));
 
     const byNumber = new Map(normalizePrescriptionArray(data).map((entry) => [entry.numero, entry]));
     for (const row of rxRows()) {
-      const number = Number(row.dataset.prescricaoNumero);
-      const entry = byNumber.get(number) || {};
+      const entry = byNumber.get(Number(row.dataset.prescricaoNumero)) || {};
       setText(row.querySelector('.med'), entry.medicamento || '');
       setText(row.querySelector('.dose'), entry.dose || '');
       setText(row.querySelector('.via'), entry.via || '');
       setText(row.querySelector('.freq'), entry.frequencia || '');
-      [...row.querySelectorAll('.time')].forEach((cell, index) => {
-        setText(cell, entry.horarios?.[index] || '');
-      });
+      [...row.querySelectorAll('.time')].forEach((cell, index) => setText(cell, entry.horarios?.[index] || ''));
     }
 
     const side = data.camposLaterais || data.aprazamento || data.anotacoes || {};
-    setText(
-      $('#aprazamento-p1'),
-      valueFrom(side, ['pagina1.aprazamento', 'pagina1.superior', 'pagina1'], ''),
-    );
-    setText(
-      $('#exames-p1'),
-      valueFrom(side, ['pagina1.exames', 'examesPagina1'], valueFrom(data, ['examesPagina1'], '')),
-    );
-    setText(
-      $('#aprazamento-p2'),
-      valueFrom(side, ['pagina2.aprazamento', 'pagina2.superior', 'pagina2'], ''),
-    );
-    setText(
-      $('#exames-p2'),
-      valueFrom(side, ['pagina2.exames', 'examesPagina2'], valueFrom(data, ['examesPagina2'], '')),
-    );
-
+    setText($('#aprazamento-p1'), valueFrom(side, ['pagina1.aprazamento', 'pagina1.superior', 'pagina1'], ''));
+    setText($('#exames-p1'), valueFrom(side, ['pagina1.exames', 'examesPagina1'], valueFrom(data, ['examesPagina1'], '')));
+    setText($('#aprazamento-p2'), valueFrom(side, ['pagina2.aprazamento', 'pagina2.superior', 'pagina2'], ''));
+    setText($('#exames-p2'), valueFrom(side, ['pagina2.exames', 'examesPagina2'], valueFrom(data, ['examesPagina2'], '')));
     updateAge();
   }
 
   function filePickerTypes() {
-    return [
-      {
-        description: 'Prescrição Médica UPA',
-        accept: {
-          [FILE_MIME]: [FILE_EXTENSION],
-        },
-      },
-    ];
+    return [{ description: 'Prescrição Médica UPA', accept: { [FILE_MIME]: [FILE_EXTENSION] } }];
   }
 
   function safeFileNamePart(value) {
-    return String(value || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-zA-Z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .toLowerCase();
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
   }
 
   function suggestedFileName() {
-    const patient = safeFileNamePart(getInput('nome')) || 'paciente';
-    const date = getInput('data') || localDateISO();
-    return `prescricao-${patient}-${date}${FILE_EXTENSION}`;
+    return `prescricao-${safeFileNamePart(getInput('nome')) || 'paciente'}-${getInput('data') || localDateISO()}${FILE_EXTENSION}`;
   }
 
   function setBusy(busy) {
     state.busy = busy;
-    [elements.open, elements.importModel, elements.clear, elements.save, elements.saveAs].forEach((button) => {
+    [elements.open, elements.importModel, elements.clear, elements.save, elements.saveAs, elements.evolution].forEach((button) => {
       if (button) button.disabled = busy;
     });
   }
@@ -522,15 +329,14 @@
     const base = message || state.currentFileName || 'Novo documento';
     elements.status.textContent = state.dirty ? `${base} — alterações não salvas` : base;
     elements.status.classList.toggle('unsaved', state.dirty);
-    document.title = state.currentFileName
-      ? `Prescrição Médica — ${state.currentFileName}${state.dirty ? ' *' : ''}`
-      : `Prescrição Médica${state.dirty ? ' *' : ''}`;
+    document.title = state.currentFileName ? `Prescrição Médica — ${state.currentFileName}${state.dirty ? ' *' : ''}` : `Prescrição Médica${state.dirty ? ' *' : ''}`;
   }
 
   function markDirty() {
-    if (state.busy) return;
-    state.dirty = true;
-    updateStatus();
+    if (!state.busy) {
+      state.dirty = true;
+      updateStatus();
+    }
   }
 
   function markSaved(fileName, message = '') {
@@ -542,30 +348,48 @@
   async function ensureWritePermission(handle) {
     if (!handle) return false;
     const options = { mode: 'readwrite' };
-
-    if (typeof handle.queryPermission === 'function') {
-      const current = await handle.queryPermission(options);
-      if (current === 'granted') return true;
-    }
-
-    if (typeof handle.requestPermission === 'function') {
-      return (await handle.requestPermission(options)) === 'granted';
-    }
-
+    if (typeof handle.queryPermission === 'function' && await handle.queryPermission(options) === 'granted') return true;
+    if (typeof handle.requestPermission === 'function') return await handle.requestPermission(options) === 'granted';
     return true;
   }
 
   async function writeToHandle(handle) {
-    if (!(await ensureWritePermission(handle))) {
-      throw new Error('A permissão para gravar o arquivo não foi concedida.');
-    }
-
+    if (!(await ensureWritePermission(handle))) throw new Error('A permissão para gravar o arquivo não foi concedida.');
     const data = collectDocumentData();
-    const json = JSON.stringify(data, null, 2) + '\n';
     const writable = await handle.createWritable();
-    await writable.write(json);
+    await writable.write(JSON.stringify(data, null, 2) + '\n');
     await writable.close();
     return data;
+  }
+
+  function openHandleDb() {
+    return new Promise((resolve, reject) => {
+      if (!('indexedDB' in window)) return reject(new Error('IndexedDB indisponível.'));
+      const request = indexedDB.open(HANDLE_DB_NAME, HANDLE_DB_VERSION);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains(HANDLE_STORE_NAME)) request.result.createObjectStore(HANDLE_STORE_NAME);
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async function storeSharedHandle(handle) {
+    try {
+      const db = await openHandleDb();
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE_NAME, 'readwrite');
+        const store = tx.objectStore(HANDLE_STORE_NAME);
+        if (handle) store.put(handle, HANDLE_KEY);
+        else store.delete(HANDLE_KEY);
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+      });
+      db.close();
+    } catch (error) {
+      console.warn('Não foi possível compartilhar o FileSystemFileHandle.', error);
+    }
   }
 
   async function saveCurrentFile() {
@@ -574,10 +398,10 @@
       await saveFileAs();
       return;
     }
-
     setBusy(true);
     try {
-      await writeToHandle(state.currentFileHandle);
+      const data = await writeToHandle(state.currentFileHandle);
+      state.sourceData = cloneJson(data);
       markSaved(state.currentFileHandle.name, `Salvo: ${state.currentFileHandle.name}`);
     } catch (error) {
       console.error(error);
@@ -596,30 +420,26 @@
     anchor.download = suggestedFileName();
     document.body.appendChild(anchor);
     anchor.click();
+    const name = anchor.download;
     anchor.remove();
     URL.revokeObjectURL(url);
     state.currentFileHandle = null;
-    markSaved(anchor.download, `Cópia baixada: ${anchor.download}`);
+    state.sourceData = cloneJson(data);
+    markSaved(name, `Cópia baixada: ${name}`);
   }
 
   async function saveFileAs() {
     if (state.busy) return;
-
     if (typeof window.showSaveFilePicker !== 'function') {
       downloadFallback();
       return;
     }
-
     try {
-      // The picker is called before any awaited work to preserve user activation.
-      const handle = await window.showSaveFilePicker({
-        suggestedName: suggestedFileName(),
-        types: filePickerTypes(),
-        excludeAcceptAllOption: false,
-      });
+      const handle = await window.showSaveFilePicker({ suggestedName: suggestedFileName(), types: filePickerTypes(), excludeAcceptAllOption: false });
       setBusy(true);
-      await writeToHandle(handle);
+      const data = await writeToHandle(handle);
       state.currentFileHandle = handle;
+      state.sourceData = cloneJson(data);
       markSaved(handle.name, `Salvo: ${handle.name}`);
     } catch (error) {
       if (error?.name !== 'AbortError') {
@@ -633,15 +453,11 @@
 
   async function loadFileHandle(handle, { launchedBySystem = false } = {}) {
     if (!handle) return;
-    if (state.dirty && !confirm('Há alterações não salvas. Deseja descartá-las e abrir outro arquivo?')) {
-      return;
-    }
-
+    if (state.dirty && !confirm('Há alterações não salvas. Deseja descartá-las e abrir outro arquivo?')) return;
     setBusy(true);
     try {
       const file = await handle.getFile();
-      const text = await file.text();
-      const data = JSON.parse(text);
+      const data = JSON.parse(await file.text());
       applyDocumentData(data);
       state.currentFileHandle = handle;
       state.currentFileName = file.name || handle.name || '';
@@ -657,10 +473,7 @@
 
   async function loadFallbackFile(file) {
     if (!file) return;
-    if (state.dirty && !confirm('Há alterações não salvas. Deseja descartá-las e abrir outro arquivo?')) {
-      return;
-    }
-
+    if (state.dirty && !confirm('Há alterações não salvas. Deseja descartá-las e abrir outro arquivo?')) return;
     setBusy(true);
     try {
       const data = JSON.parse(await file.text());
@@ -683,8 +496,7 @@
     setBusy(true);
     try {
       const file = await handle.getFile();
-      const data = JSON.parse(await file.text());
-      applyPrescriptionOnly(data);
+      applyPrescriptionOnly(JSON.parse(await file.text()));
       state.dirty = true;
       updateStatus(`Modelo importado: ${file.name || handle.name || 'arquivo .upa24'}`);
     } catch (error) {
@@ -699,8 +511,7 @@
     if (!file) return;
     setBusy(true);
     try {
-      const data = JSON.parse(await file.text());
-      applyPrescriptionOnly(data);
+      applyPrescriptionOnly(JSON.parse(await file.text()));
       state.dirty = true;
       updateStatus(`Modelo importado: ${file.name}`);
     } catch (error) {
@@ -714,18 +525,12 @@
 
   async function importModelPicker() {
     if (state.busy) return;
-
     if (typeof window.showOpenFilePicker !== 'function') {
       elements.modelFallbackInput?.click();
       return;
     }
-
     try {
-      const [handle] = await window.showOpenFilePicker({
-        multiple: false,
-        types: filePickerTypes(),
-        excludeAcceptAllOption: false,
-      });
+      const [handle] = await window.showOpenFilePicker({ multiple: false, types: filePickerTypes(), excludeAcceptAllOption: false });
       await loadModelHandle(handle);
     } catch (error) {
       if (error?.name !== 'AbortError') {
@@ -737,18 +542,12 @@
 
   async function openFilePicker() {
     if (state.busy) return;
-
     if (typeof window.showOpenFilePicker !== 'function') {
       elements.fallbackInput?.click();
       return;
     }
-
     try {
-      const [handle] = await window.showOpenFilePicker({
-        multiple: false,
-        types: filePickerTypes(),
-        excludeAcceptAllOption: false,
-      });
+      const [handle] = await window.showOpenFilePicker({ multiple: false, types: filePickerTypes(), excludeAcceptAllOption: false });
       await loadFileHandle(handle);
     } catch (error) {
       if (error?.name !== 'AbortError') {
@@ -756,6 +555,53 @@
         alert(`Não foi possível abrir o arquivo.\n\n${error.message || error}`);
       }
     }
+  }
+
+  async function openInEvolution() {
+    if (state.busy) return;
+    setBusy(true);
+    let navigating = false;
+    try {
+      let data;
+      if (state.currentFileHandle) {
+        data = await writeToHandle(state.currentFileHandle);
+        state.sourceData = cloneJson(data);
+        markSaved(state.currentFileHandle.name, `Salvo: ${state.currentFileHandle.name}`);
+        await storeSharedHandle(state.currentFileHandle);
+      } else {
+        data = collectDocumentData();
+        state.sourceData = cloneJson(data);
+        await storeSharedHandle(null);
+        state.dirty = false;
+        updateStatus(state.currentFileName || 'Documento transferido para Evolução');
+      }
+
+      sessionStorage.setItem(HANDOFF_SESSION_KEY, JSON.stringify({
+        data,
+        fileName: state.currentFileName || suggestedFileName(),
+        hasFileHandle: Boolean(state.currentFileHandle),
+        transferredAt: new Date().toISOString(),
+      }));
+      navigating = true;
+      window.location.href = new URL('../EVOLUCAO/?from=prescricao', window.location.href).href;
+    } catch (error) {
+      console.error(error);
+      alert(`Não foi possível abrir este arquivo na Evolução.\n\n${error.message || error}`);
+    } finally {
+      if (!navigating) setBusy(false);
+    }
+  }
+
+  function installEvolutionButton() {
+    const actions = document.querySelector('.toolbar-actions');
+    if (!actions || document.getElementById('open-evolution-button')) return;
+    const button = document.createElement('button');
+    button.id = 'open-evolution-button';
+    button.type = 'button';
+    button.className = 'secondary-outline';
+    button.textContent = 'Abrir na evolução';
+    actions.insertBefore(button, elements.print || null);
+    elements.evolution = button;
   }
 
   function getSearchParameterCaseInsensitive(name) {
@@ -768,12 +614,10 @@
 
   function applyGetParameters() {
     if (state.launchReceived || state.currentFileHandle) return;
-
     const unit = getSearchParameterCaseInsensitive('UNIDADE');
     const name = getSearchParameterCaseInsensitive('NOME');
     const birth = getSearchParameterCaseInsensitive('NASCIMENTO');
     const patientId = getSearchParameterCaseInsensitive('ID');
-
     if (unit) setUnit(unit);
     if (patientId) setInput('id_paciente', patientId);
     if (name) setInput('nome', name);
@@ -781,12 +625,7 @@
     setInput('data', localDateISO());
     updateAge();
     state.dirty = false;
-
-    if (unit || patientId || name || birth) {
-      updateStatus('Dados recebidos por GET — ainda não salvos em arquivo');
-    } else {
-      updateStatus('Novo documento');
-    }
+    updateStatus(unit || patientId || name || birth ? 'Dados recebidos por GET — ainda não salvos em arquivo' : 'Novo documento');
   }
 
   function handleClear() {
@@ -801,31 +640,23 @@
     elements.clear?.addEventListener('click', handleClear);
     elements.save?.addEventListener('click', saveCurrentFile);
     elements.saveAs?.addEventListener('click', saveFileAs);
+    elements.evolution?.addEventListener('click', openInEvolution);
     elements.print?.addEventListener('click', () => window.print());
-    elements.fallbackInput?.addEventListener('change', (event) => {
-      loadFallbackFile(event.target.files?.[0]);
-    });
-    elements.modelFallbackInput?.addEventListener('change', (event) => {
-      loadFallbackModel(event.target.files?.[0]);
-    });
-
+    elements.fallbackInput?.addEventListener('change', (event) => loadFallbackFile(event.target.files?.[0]));
+    elements.modelFallbackInput?.addEventListener('change', (event) => loadFallbackModel(event.target.files?.[0]));
     $('#nascimento')?.addEventListener('input', updateAge);
 
     document.addEventListener('input', (event) => {
-      if (event.target.matches('input:not([type="file"]), [contenteditable="true"]')) {
-        markDirty();
-      }
+      if (event.target.matches('input:not([type="file"]), [contenteditable="true"]')) markDirty();
     });
 
     document.addEventListener('keydown', (event) => {
       const modifier = event.ctrlKey || event.metaKey;
       if (!modifier) return;
       const key = event.key.toLowerCase();
-
       if (key === 's') {
         event.preventDefault();
-        if (event.shiftKey) saveFileAs();
-        else saveCurrentFile();
+        if (event.shiftKey) saveFileAs(); else saveCurrentFile();
       } else if (key === 'o') {
         event.preventDefault();
         openFilePicker();
@@ -864,11 +695,7 @@
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js').catch((error) => {
-          console.error('Falha ao registrar o service worker:', error);
-        });
-      });
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch((error) => console.error('Falha ao registrar o service worker:', error)));
     }
   }
 
@@ -884,12 +711,10 @@
   }
 
   function initialize() {
+    installEvolutionButton();
     bindEvents();
     registerServiceWorker();
     registerFileLaunchHandler();
-
-    // Defaults are applied first. A file launched by the operating system, if present,
-    // is loaded afterward and takes precedence over URL parameters.
     setInput('data', localDateISO());
     setUnit(getText($('.unidade')) || 'RIACHO GRANDE');
     updateAge();
