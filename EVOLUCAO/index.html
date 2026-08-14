@@ -35,8 +35,11 @@
     @media(max-width:850px){.sheet{margin:0;transform-origin:top left;box-shadow:none}.toolbar{position:relative}#document-status{width:100%;margin:0}}
     @media print{
       @page{size:A4 portrait;margin:0}
+      html,body,#pages{margin:0!important;padding:0!important;background:#fff!important}
       .toolbar{display:none}
-      .sheet{margin:0;width:210mm;height:297mm;min-height:0;padding:12mm 13mm 10mm;box-shadow:none;overflow:hidden}
+      .sheet{margin:0;width:210mm;height:296.5mm;min-height:0;padding:12mm 13mm 10mm;box-shadow:none;overflow:hidden;page-break-after:auto!important;break-after:auto!important;page-break-inside:avoid!important;break-inside:avoid-page!important}
+      .sheet + .sheet{page-break-before:always!important;break-before:page!important}
+      .sheet:last-of-type{page-break-after:auto!important;break-after:auto!important}
       .patient .cell-field>input{border:0!important;box-shadow:none!important;background:transparent!important}
       .date-time .row-datetime{display:none!important}
       .datetime-print{display:flex!important}
