@@ -4,7 +4,6 @@
   const EXTENSION = '.upa24';
   const ROWS_PER_PAGE = 20;
   const TOTAL_ROWS = 42;
-  const MAX_CHARS_PER_LINE = 65;
   const MUNICIPAL_CNPJ = '46.523.239/0001-47';
   const UNIDADES = [
     { aliases:['UPA RIACHO GRANDE','RIACHO GRANDE'], nome:'UPA RIACHO GRANDE', endereco:'Rua Marcílio Conrado, nº 333 - Bairro Riacho Grande', cidade:'São Bernardo do Campo/SP' },
@@ -46,7 +45,7 @@
   }
 
   function page(number,start,count){
-    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<div class="evolution-wrap" data-start="${start}" data-count="${count}"><table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}<tr class="footer-row"><td class="dados-unidade" colspan="2"></td></tr></tbody></table><label class="visually-hidden" for="evolucao-${start}">Evolução</label><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" wrap="off" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></div></section>`;
+    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<div class="evolution-wrap" data-start="${start}" data-count="${count}"><table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}<tr class="footer-row"><td class="dados-unidade" colspan="2"></td></tr></tbody></table><label class="visually-hidden" for="evolucao-${start}">Evolução</label><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></div></section>`;
   }
 
   $('#pages').innerHTML=page(1,0,ROWS_PER_PAGE)+page(2,ROWS_PER_PAGE,TOTAL_ROWS-ROWS_PER_PAGE);
@@ -108,38 +107,22 @@
     requestAnimationFrame(()=>requestAnimationFrame(syncEvolutionOverlays));
   }
 
-  function limitEvolutionText(value,maxLines){
-    const source=String(value??'').replace(/\r\n?/g,'\n');
-    const out=[];
-    for(const logicalLine of source.split('\n')){
-      if(logicalLine.length===0){
-        out.push('');
-      }else{
-        for(let i=0;i<logicalLine.length;i+=MAX_CHARS_PER_LINE){
-          out.push(logicalLine.slice(i,i+MAX_CHARS_PER_LINE));
-          if(out.length>=maxLines) break;
-        }
-      }
-      if(out.length>=maxLines) break;
-    }
-    return out.slice(0,maxLines).join('\n');
+  function pinEvolutionTop(textarea){
+    if(!textarea?.matches?.('.page-evolution')) return;
+    textarea.scrollTop=0;
+    textarea.scrollLeft=0;
+    requestAnimationFrame(()=>{
+      textarea.scrollTop=0;
+      textarea.scrollLeft=0;
+    });
   }
 
-  function enforceEvolutionLimit(textarea){
-    const maxLines=Number(textarea?.dataset?.count)||0;
-    if(!textarea||!maxLines) return;
-    const raw=textarea.value;
-    const limited=limitEvolutionText(raw,maxLines);
-    if(limited===raw) return;
-    const caret=textarea.selectionStart??raw.length;
-    const limitedBeforeCaret=limitEvolutionText(raw.slice(0,caret),maxLines);
-    textarea.value=limited;
-    const newCaret=Math.min(limitedBeforeCaret.length,limited.length);
-    textarea.setSelectionRange?.(newCaret,newCaret);
+  function pinAllEvolutionTop(){
+    $$('.page-evolution').forEach(pinEvolutionTop);
   }
 
   function splitPageText(text,count){
-    const lines=limitEvolutionText(text,count).split('\n');
+    const lines=String(text??'').replace(/\r\n?/g,'\n').split('\n');
     const out=Array.from({length:count},()=> '');
     for(let i=0;i<Math.min(lines.length,count);i++) out[i]=lines[i];
     return out;
@@ -147,12 +130,11 @@
 
   function collect(){
     syncPrintDateTimes();
-    $$('.page-evolution').forEach(enforceEvolutionLimit);
     const base=cloneJson(state.source||{});
     base.formatoOriginal=base.formato||null;
     base.formato=FORMAT;
     base.versaoEvolucao=2;
-    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.1.3'};
+    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.1.4'};
     base.ultimaAlteracao=new Date().toISOString();
     base.unidade=base.unidade||`UPA ${$('#unit-label').textContent}`;
     base.paciente={
@@ -172,7 +154,7 @@
       const texto=(pageTexts[pageStart]||[])[i-pageStart]||'';
       return {numero:i+1,data,hora,datetime:dt,texto};
     });
-    base.evolucaoTextoPaginas=$$('.page-evolution').map((t,index)=>({pagina:index+1,texto:limitEvolutionText(t.value,Number(t.dataset.count))}));
+    base.evolucaoTextoPaginas=$$('.page-evolution').map((t,index)=>({pagina:index+1,texto:t.value}));
     return base;
   }
 
@@ -196,20 +178,25 @@
 
     const storedPages=Array.isArray(data.evolucaoTextoPaginas)?data.evolucaoTextoPaginas:[];
     $$('.page-evolution').forEach((t,pageIndex)=>{
-      const count=Number(t.dataset.count);
       const stored=storedPages.find(p=>Number(p.pagina)===pageIndex+1)?.texto;
-      if(stored!==undefined){ t.value=limitEvolutionText(stored,count); return; }
-      const start=Number(t.dataset.start);
+      if(stored!==undefined){
+        t.value=String(stored??'');
+        pinEvolutionTop(t);
+        return;
+      }
+      const start=Number(t.dataset.start), count=Number(t.dataset.count);
       const lines=[];
       for(let i=0;i<count;i++){
         const e=evol.find(x=>Number(x.numero)===start+i+1)||evol[start+i]||{};
         lines.push(e.texto||e.evolucao||'');
       }
       while(lines.length && !lines[lines.length-1]) lines.pop();
-      t.value=limitEvolutionText(lines.join('\n'),count);
+      t.value=lines.join('\n');
+      pinEvolutionTop(t);
     });
     syncPrintDateTimes();
     scheduleEvolutionOverlaySync();
+    pinAllEvolutionTop();
     state.dirty=false;
     setStatus();
   }
@@ -221,6 +208,7 @@
     updateUnitPresentation('UPA RIACHO GRANDE');
     syncPrintDateTimes();
     scheduleEvolutionOverlaySync();
+    pinAllEvolutionTop();
     state.dirty=false;
     setStatus();
   }
@@ -264,19 +252,27 @@
 
   document.addEventListener('input',e=>{
     if(e.target.matches('.row-datetime')) syncPrintDateTimes();
-    if(e.target.matches('.page-evolution')) enforceEvolutionLimit(e.target);
+    if(e.target.matches('.page-evolution')) pinEvolutionTop(e.target);
     markDirty();
   });
+  document.addEventListener('scroll',e=>{
+    if(e.target?.matches?.('.page-evolution')) pinEvolutionTop(e.target);
+  },true);
+  document.addEventListener('selectionchange',()=>{
+    const active=document.activeElement;
+    if(active?.matches?.('.page-evolution')) pinEvolutionTop(active);
+  });
   $('#open-button').onclick=openFile;$('#clear-button').onclick=reset;$('#save-button').onclick=()=>save(false);$('#save-as-button').onclick=()=>save(true);
-  $('#print-button').onclick=()=>{syncPrintDateTimes();syncEvolutionOverlays();window.print();};
+  $('#print-button').onclick=()=>{syncPrintDateTimes();syncEvolutionOverlays();pinAllEvolutionTop();window.print();};
   $('#file-input').onchange=e=>{const f=e.target.files?.[0];if(f)readFile(f);e.target.value='';};
   window.addEventListener('resize',scheduleEvolutionOverlaySync);
-  window.addEventListener('beforeprint',()=>{syncPrintDateTimes();syncEvolutionOverlays();});
-  window.addEventListener('afterprint',scheduleEvolutionOverlaySync);
+  window.addEventListener('beforeprint',()=>{syncPrintDateTimes();syncEvolutionOverlays();pinAllEvolutionTop();});
+  window.addEventListener('afterprint',()=>{scheduleEvolutionOverlaySync();pinAllEvolutionTop();});
   window.addEventListener('beforeunload',e=>{if(state.dirty){e.preventDefault();e.returnValue='';}});
   if('launchQueue'in window)launchQueue.setConsumer(async params=>{const h=params.files?.[0];if(h)await readFile(await h.getFile(),h);});
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(console.error);
   updateUnitPresentation('UPA RIACHO GRANDE');
   syncPrintDateTimes();
   scheduleEvolutionOverlaySync();
+  pinAllEvolutionTop();
 })();
