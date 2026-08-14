@@ -4,7 +4,7 @@
   const EXTENSION = '.upa24';
   const ROWS_PER_PAGE = 20;
   const TOTAL_ROWS = 42;
-  const MAX_CHARS_PER_LINE = 70;
+  const MAX_CHARS_PER_LINE = 65;
   const MUNICIPAL_CNPJ = '46.523.239/0001-47';
   const UNIDADES = [
     { aliases:['UPA RIACHO GRANDE','RIACHO GRANDE'], nome:'UPA RIACHO GRANDE', endereco:'Rua Marcílio Conrado, nº 333 - Bairro Riacho Grande', cidade:'São Bernardo do Campo/SP' },
