@@ -103,7 +103,7 @@
     base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.0.0'};
     base.ultimaAlteracao=new Date().toISOString();
     base.unidade=base.unidade||`UPA ${$('#unit-label').textContent}`;
-    base.paciente={...(base.paciente||{}),nome:$('#nome').value,idade:$('#idade').value,id:$('#id')||base.paciente?.idade||null};
+    base.paciente={...(base.paciente||{}),nome:$('#nome').value,idade:$('#idade').value,id:$('#id').value||base.paciente?.idade||null};
     base.atendimento={...(base.atendimento||{}),diagnosticos:$('#diagnosticos').value,sala:$('#sala').value,leito:$('#leito').value};
 
     const pageTexts={};
