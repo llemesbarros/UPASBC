@@ -25,7 +25,7 @@
   function header(first){
     if(!first) return '';
     return `<table class="header"><tr><td class="logo" rowspan="3"><img src="../logo-sbc.jpg" alt="Prefeitura de São Bernardo do Campo"></td><td class="city">MUNICÍPIO DE SÃO BERNARDO DO CAMPO</td></tr><tr><td class="secretary">Secretaria da Saúde</td></tr><tr><td class="unit">Unidade de Pronto Atendimento<br><span id="unit-label">Riacho Grande</span></td></tr></table>
-    <table class="patient"><tr><td colspan="2"><div class="cell-field"><label for="nome">NOME:</label><input id="nome" autocomplete="off"></div></td></tr><tr><td class="split"><div class="cell-field"><label for="sala">SALA:</label><input id="sala" autocomplete="off"></div></td><td class="small"><div class="cell-field"><label for="leito">LEITO:</label><input id="leito" autocomplete="off"></div></td></tr><tr><td><div class="cell-field"><label for="diagnosticos">HD:</label><input id="diagnosticos" autocomplete="off"></div></td><td><div class="cell-field"><label for="idade">IDADE:</label><input id="idade" autocomplete="off"></div></td></tr></table>`;
+    <table class="patient"><tr><td colspan="3"><div class="cell-field"><label for="nome">NOME:</label><input id="nome" autocomplete="off"></div></td><td colspan="1"><div class="cell-field"><label for="id">HYGIA:</label><input id="id" autocomplete="off"></div></td></tr><tr><td colspan="2"><div class="cell-field"><label for="sala">SALA:</label><input id="sala" autocomplete="off"></div></td><td colspan="2"><div class="cell-field"><label for="leito">LEITO:</label><input id="leito" autocomplete="off"></div></td></tr><tr><td colspan="3"><div class="cell-field"><label for="diagnosticos">HD:</label><input id="diagnosticos" autocomplete="off"></div></td><td colspan="1"><div class="cell-field"><label for="idade">IDADE:</label><input id="idade" autocomplete="off"></div></td></tr></table>`;
   }
 
   function formatDateTimeForPrint(value){
@@ -66,7 +66,7 @@
   function shortUnitName(value){ return String(value||'').replace(/^UPA\s+/i,'').trim(); }
   function unitFooterText(unit,fallback=''){
     if(!unit) return String(fallback||'').trim();
-    return [unit.nome,unit.endereco,unit.cidade,`CNPJ: ${MUNICIPAL_CNPJ}`].filter(Boolean).join(' - ');
+    return [unit.endereco,unit.cidade,`CNPJ: ${MUNICIPAL_CNPJ}`].filter(Boolean).join(' - ');
   }
   function updateUnitPresentation(value){
     const raw=String(value||'UPA RIACHO GRANDE').trim()||'UPA RIACHO GRANDE';
@@ -103,7 +103,7 @@
     base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.0.0'};
     base.ultimaAlteracao=new Date().toISOString();
     base.unidade=base.unidade||`UPA ${$('#unit-label').textContent}`;
-    base.paciente={...(base.paciente||{}),nome:$('#nome').value,idade:$('#idade').value||base.paciente?.idade||null};
+    base.paciente={...(base.paciente||{}),nome:$('#nome').value,idade:$('#idade').value,id:$('#id')||base.paciente?.idade||null};
     base.atendimento={...(base.atendimento||{}),diagnosticos:$('#diagnosticos').value,sala:$('#sala').value,leito:$('#leito').value};
 
     const pageTexts={};
@@ -122,6 +122,7 @@
   function apply(data){
     state.source=structuredClone(data);
     $('#nome').value=valueAt(data,['paciente.nome','nome']);
+    $('#id').value=valueAt(data,['paciente.id','id']);
     $('#sala').value=valueAt(data,['atendimento.sala','sala']);
     $('#leito').value=valueAt(data,['atendimento.leito','leito']);
     $('#diagnosticos').value=valueAt(data,['atendimento.diagnosticos','atendimento.diagnostico','diagnosticos']);
