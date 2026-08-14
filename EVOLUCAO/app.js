@@ -21,6 +21,7 @@
   const $$ = (s) => [...document.querySelectorAll(s)];
   const localDate = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
   const valueAt = (o, paths, fallback='') => { for(const p of paths){ const v=p.split('.').reduce((a,k)=>a?.[k],o); if(v!==undefined&&v!==null)return v; } return fallback; };
+  const cloneJson = (value) => JSON.parse(JSON.stringify(value ?? {}));
 
   function header(first){
     if(!first) return '';
@@ -39,13 +40,12 @@
   function rows(start,count){
     return Array.from({length:count},(_,i)=>{
       const n=start+i;
-      const entryCell = i===0 ? `<td class="entry-continuous" rowspan="${count}" style="--rows:${count}"><label class="visually-hidden" for="evolucao-${start}">Evolução</label><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></td>` : '';
-      return `<tr data-row="${n}"><td class="date-time"><label class="visually-hidden" for="datetime-${n}">Data e hora</label><input id="datetime-${n}" class="row-datetime" type="datetime-local"><span class="datetime-print" aria-hidden="true"></span></td>${entryCell}</tr>`;
+      return `<tr data-row="${n}"><td class="date-time"><label class="visually-hidden" for="datetime-${n}">Data e hora</label><input id="datetime-${n}" class="row-datetime" type="datetime-local"><span class="datetime-print" aria-hidden="true"></span></td><td class="entry-guide" aria-hidden="true"></td></tr>`;
     }).join('');
   }
 
   function page(number,start,count){
-    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}<tr class="footer-row"><td class="dados-unidade" colspan="2"></td></tr></tbody></table></section>`;
+    return `<section class="sheet ${number===2?'page-two':''}">${header(number===1)}<div class="evolution-wrap" data-start="${start}" data-count="${count}"><table class="evolution"><thead><tr><th class="datetime">DATA/HORA</th><th>EVOLUÇÃO MULTIDISCIPLINAR</th></tr></thead><tbody>${rows(start,count)}<tr class="footer-row"><td class="dados-unidade" colspan="2"></td></tr></tbody></table><label class="visually-hidden" for="evolucao-${start}">Evolução</label><textarea id="evolucao-${start}" class="page-evolution" data-start="${start}" data-count="${count}" spellcheck="true" aria-label="Evolução multidisciplinar da página"></textarea></div></section>`;
   }
 
   $('#pages').innerHTML=page(1,0,ROWS_PER_PAGE)+page(2,ROWS_PER_PAGE,TOTAL_ROWS-ROWS_PER_PAGE);
@@ -66,7 +66,7 @@
   function shortUnitName(value){ return String(value||'').replace(/^UPA\s+/i,'').trim(); }
   function unitFooterText(unit,fallback=''){
     if(!unit) return String(fallback||'').trim();
-    return [unit.endereco,unit.cidade,`CNPJ: ${MUNICIPAL_CNPJ}`].filter(Boolean).join(' - ');
+    return [unit.nome,unit.endereco,unit.cidade,`CNPJ: ${MUNICIPAL_CNPJ}`].filter(Boolean).join(' - ');
   }
   function updateUnitPresentation(value){
     const raw=String(value||'UPA RIACHO GRANDE').trim()||'UPA RIACHO GRANDE';
@@ -82,8 +82,30 @@
     $$('tr[data-row]').forEach(r=>{
       const input=r.querySelector('.row-datetime');
       const out=r.querySelector('.datetime-print');
-      out.textContent=formatDateTimeForPrint(input?.value||'');
+      if(out) out.textContent=formatDateTimeForPrint(input?.value||'');
     });
+  }
+
+  function syncEvolutionOverlays(){
+    $$('.page-evolution').forEach(textarea=>{
+      const wrap=textarea.closest('.evolution-wrap');
+      if(!wrap) return;
+      const guides=[...wrap.querySelectorAll('tr[data-row] .entry-guide')];
+      if(!guides.length) return;
+
+      const wrapRect=wrap.getBoundingClientRect();
+      const firstRect=guides[0].getBoundingClientRect();
+      const lastRect=guides[guides.length-1].getBoundingClientRect();
+
+      textarea.style.left=`${firstRect.left-wrapRect.left}px`;
+      textarea.style.top=`${firstRect.top-wrapRect.top}px`;
+      textarea.style.width=`${firstRect.width}px`;
+      textarea.style.height=`${lastRect.bottom-firstRect.top}px`;
+    });
+  }
+
+  function scheduleEvolutionOverlaySync(){
+    requestAnimationFrame(()=>requestAnimationFrame(syncEvolutionOverlays));
   }
 
   function splitPageText(text,count){
@@ -96,14 +118,19 @@
 
   function collect(){
     syncPrintDateTimes();
-    const base=structuredClone(state.source||{});
+    const base=cloneJson(state.source||{});
     base.formatoOriginal=base.formato||null;
     base.formato=FORMAT;
     base.versaoEvolucao=2;
-    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.0.0'};
+    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.1.2'};
     base.ultimaAlteracao=new Date().toISOString();
     base.unidade=base.unidade||`UPA ${$('#unit-label').textContent}`;
-    base.paciente={...(base.paciente||{}),nome:$('#nome').value,idade:$('#idade').value,id:$('#id').value||base.paciente?.idade||null};
+    base.paciente={
+      ...(base.paciente||{}),
+      nome:$('#nome').value,
+      idade:$('#idade').value||base.paciente?.idade||null,
+      id:$('#id').value||base.paciente?.id||null
+    };
     base.atendimento={...(base.atendimento||{}),diagnosticos:$('#diagnosticos').value,sala:$('#sala').value,leito:$('#leito').value};
 
     const pageTexts={};
@@ -120,7 +147,7 @@
   }
 
   function apply(data){
-    state.source=structuredClone(data);
+    state.source=cloneJson(data);
     $('#nome').value=valueAt(data,['paciente.nome','nome']);
     $('#id').value=valueAt(data,['paciente.id','id']);
     $('#sala').value=valueAt(data,['atendimento.sala','sala']);
@@ -151,6 +178,7 @@
       t.value=lines.join('\n');
     });
     syncPrintDateTimes();
+    scheduleEvolutionOverlaySync();
     state.dirty=false;
     setStatus();
   }
@@ -159,7 +187,11 @@
     if(state.dirty&&!confirm('Descartar as alterações não salvas?'))return;
     state.handle=null;state.fileName='';state.source={};
     $$('input:not([type=file]),textarea').forEach(e=>e.value='');
-    updateUnitPresentation('UPA RIACHO GRANDE');syncPrintDateTimes();state.dirty=false;setStatus();
+    updateUnitPresentation('UPA RIACHO GRANDE');
+    syncPrintDateTimes();
+    scheduleEvolutionOverlaySync();
+    state.dirty=false;
+    setStatus();
   }
 
   async function readFile(file,handle=null){
@@ -191,21 +223,25 @@
     const w=await handle.createWritable();await w.write(JSON.stringify(data,null,2)+'\n');await w.close();
   }
   async function save(as=false){
-    const data=collect();
     try{
+      const data=collect();
       if('showSaveFilePicker'in window){let h=state.handle;if(as||!h)h=await showSaveFilePicker({suggestedName:suggested(),types:pickerTypes()});await write(h,data);state.handle=h;state.fileName=h.name;}
       else{download(data,suggested());state.handle=null;state.fileName=suggested();}
-      state.source=structuredClone(data);state.dirty=false;setStatus(`Salvo: ${state.fileName}`);
+      state.source=cloneJson(data);state.dirty=false;setStatus(`Salvo: ${state.fileName}`);
     }catch(e){if(e.name!=='AbortError')alert(`Não foi possível salvar.\n\n${e.message}`);}
   }
 
   document.addEventListener('input',e=>{if(e.target.matches('.row-datetime'))syncPrintDateTimes();markDirty();});
   $('#open-button').onclick=openFile;$('#clear-button').onclick=reset;$('#save-button').onclick=()=>save(false);$('#save-as-button').onclick=()=>save(true);
-  $('#print-button').onclick=()=>{syncPrintDateTimes();window.print();};
+  $('#print-button').onclick=()=>{syncPrintDateTimes();syncEvolutionOverlays();window.print();};
   $('#file-input').onchange=e=>{const f=e.target.files?.[0];if(f)readFile(f);e.target.value='';};
+  window.addEventListener('resize',scheduleEvolutionOverlaySync);
+  window.addEventListener('beforeprint',()=>{syncPrintDateTimes();syncEvolutionOverlays();});
+  window.addEventListener('afterprint',scheduleEvolutionOverlaySync);
   window.addEventListener('beforeunload',e=>{if(state.dirty){e.preventDefault();e.returnValue='';}});
   if('launchQueue'in window)launchQueue.setConsumer(async params=>{const h=params.files?.[0];if(h)await readFile(await h.getFile(),h);});
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(console.error);
   updateUnitPresentation('UPA RIACHO GRANDE');
   syncPrintDateTimes();
+  scheduleEvolutionOverlaySync();
 })();
