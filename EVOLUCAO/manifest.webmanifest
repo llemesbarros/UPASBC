@@ -10,6 +10,8 @@
   "orientation": "portrait",
   "theme_color": "#006b8f",
   "background_color": "#e6e9ec",
-  "icons": [{"src":"../PRESCRICAO/icons/icon-192.png","sizes":"192x192","type":"image/png"},{"src":"../PRESCRICAO/icons/icon-512.png","sizes":"512x512","type":"image/png"}],
-  "file_handlers": [{"action":"./","accept":{"application/json":[".upa24"]},"launch_type":"single-client"}]
+  "icons": [
+    {"src":"../PRESCRICAO/icons/icon-192.png","sizes":"192x192","type":"image/png"},
+    {"src":"../PRESCRICAO/icons/icon-512.png","sizes":"512x512","type":"image/png"}
+  ]
 }
