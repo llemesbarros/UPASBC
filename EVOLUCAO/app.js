@@ -135,7 +135,7 @@
     base.formatoOriginal=base.formato||null;
     base.formato=FORMAT;
     base.versaoEvolucao=2;
-    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.1.6'};
+    base.aplicativoEvolucao={nome:'Evolução Multidisciplinar',versao:'2.1.7'};
     base.ultimaAlteracao=new Date().toISOString();
     base.unidade=base.unidade||`UPA ${$('#unit-label').textContent}`;
     base.paciente={
@@ -299,6 +299,24 @@
     });
   }
 
+  async function storeSharedHandle(handle){
+    try{
+      const db=await openHandleDb();
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction(HANDLE_STORE_NAME,'readwrite');
+        const store=tx.objectStore(HANDLE_STORE_NAME);
+        if(handle) store.put(handle,HANDLE_KEY);
+        else store.delete(HANDLE_KEY);
+        tx.oncomplete=resolve;
+        tx.onerror=()=>reject(tx.error);
+        tx.onabort=()=>reject(tx.error);
+      });
+      db.close();
+    }catch(error){
+      console.warn('Não foi possível compartilhar o FileSystemFileHandle.',error);
+    }
+  }
+
   async function getSharedHandle(){
     try{
       const db=await openHandleDb();
@@ -316,12 +334,23 @@
     }
   }
 
+  function setHandoff(direction,data,fileName,hasFileHandle){
+    sessionStorage.setItem(HANDOFF_SESSION_KEY,JSON.stringify({
+      direction,
+      data,
+      fileName,
+      hasFileHandle,
+      transferredAt:new Date().toISOString()
+    }));
+  }
+
   async function consumePrescriptionHandoff(){
     const raw=sessionStorage.getItem(HANDOFF_SESSION_KEY);
     if(!raw) return false;
-    sessionStorage.removeItem(HANDOFF_SESSION_KEY);
     try{
       const payload=JSON.parse(raw);
+      if(payload?.direction && payload.direction!=='prescricao-evolucao') return false;
+      sessionStorage.removeItem(HANDOFF_SESSION_KEY);
       const data=payload?.data;
       if(!data||typeof data!=='object'||Array.isArray(data)) return false;
       let handle=payload.hasFileHandle ? await getSharedHandle() : null;
@@ -338,6 +367,62 @@
       console.error('Falha ao receber arquivo da Prescrição.',error);
       return false;
     }
+  }
+
+  async function returnToPrescription(){
+    if(state.busy) return;
+    state.busy=true;
+    let navigating=false;
+    try{
+      const data=collect();
+      if(state.handle){
+        await write(state.handle,data);
+        state.fileName=state.handle.name||state.fileName;
+        await storeSharedHandle(state.handle);
+      }else{
+        await storeSharedHandle(null);
+      }
+      state.source=cloneJson(data);
+      state.dirty=false;
+      setHandoff('evolucao-prescricao',data,state.fileName||suggested(),Boolean(state.handle));
+      navigating=true;
+      window.location.href=new URL('../PRESCRICAO/?from=evolucao',window.location.href).href;
+    }catch(error){
+      console.error(error);
+      alert(`Não foi possível retornar este arquivo para a Prescrição.\n\n${error.message||error}`);
+    }finally{
+      if(!navigating){
+        state.busy=false;
+        setStatus();
+      }
+    }
+  }
+
+  async function redirectSystemLaunchToPrescription(handle){
+    if(!handle) return;
+    try{
+      const file=await handle.getFile();
+      const data=JSON.parse(await file.text());
+      if(!data||typeof data!=='object'||Array.isArray(data)) throw new Error('Conteúdo inválido');
+      await storeSharedHandle(handle);
+      state.dirty=false;
+      setHandoff('evolucao-prescricao',data,file.name||handle.name||'arquivo.upa24',true);
+      window.location.replace(new URL('../PRESCRICAO/?from=evolucao-launch',window.location.href).href);
+    }catch(error){
+      console.error(error);
+      alert(`Não foi possível encaminhar o arquivo para a Prescrição.\n\n${error.message||error}`);
+    }
+  }
+
+  function installPrescriptionButton(){
+    const toolbar=document.querySelector('.toolbar');
+    if(!toolbar||document.getElementById('prescription-button')) return;
+    const button=document.createElement('button');
+    button.id='prescription-button';
+    button.type='button';
+    button.textContent='← Prescrição';
+    toolbar.insertBefore(button,$('#open-button')||toolbar.firstChild);
+    button.addEventListener('click',returnToPrescription);
   }
 
   document.addEventListener('input',e=>{
@@ -369,12 +454,13 @@
 
   if('launchQueue'in window)launchQueue.setConsumer(async params=>{
     const h=params.files?.[0];
-    if(h)await readFile(await h.getFile(),h);
+    if(h)await redirectSystemLaunchToPrescription(h);
   });
 
   if('serviceWorker'in navigator)navigator.serviceWorker.register('./service-worker.js').catch(console.error);
 
   async function initialize(){
+    installPrescriptionButton();
     updateUnitPresentation('UPA RIACHO GRANDE');
     syncPrintDateTimes();
     scheduleEvolutionOverlaySync();
