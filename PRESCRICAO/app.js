@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '1.1.1';
+  const APP_VERSION = '1.1.2';
   const FILE_FORMAT = 'prescricao-medica-upa24';
   const FILE_EXTENSION = '.upa24';
   const FILE_MIME = 'application/json';
@@ -392,6 +392,23 @@
     }
   }
 
+  async function getSharedHandle() {
+    try {
+      const db = await openHandleDb();
+      const handle = await new Promise((resolve, reject) => {
+        const tx = db.transaction(HANDLE_STORE_NAME, 'readonly');
+        const request = tx.objectStore(HANDLE_STORE_NAME).get(HANDLE_KEY);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error);
+      });
+      db.close();
+      return handle;
+    } catch (error) {
+      console.warn('Não foi possível recuperar o FileSystemFileHandle compartilhado.', error);
+      return null;
+    }
+  }
+
   async function saveCurrentFile() {
     if (state.busy) return;
     if (!state.currentFileHandle) {
@@ -577,6 +594,7 @@
       }
 
       sessionStorage.setItem(HANDOFF_SESSION_KEY, JSON.stringify({
+        direction: 'prescricao-evolucao',
         data,
         fileName: state.currentFileName || suggestedFileName(),
         hasFileHandle: Boolean(state.currentFileHandle),
@@ -589,6 +607,29 @@
       alert(`Não foi possível abrir este arquivo na Evolução.\n\n${error.message || error}`);
     } finally {
       if (!navigating) setBusy(false);
+    }
+  }
+
+  async function consumeEvolutionHandoff() {
+    const raw = sessionStorage.getItem(HANDOFF_SESSION_KEY);
+    if (!raw) return false;
+    try {
+      const payload = JSON.parse(raw);
+      if (payload?.direction !== 'evolucao-prescricao') return false;
+      sessionStorage.removeItem(HANDOFF_SESSION_KEY);
+      const data = payload?.data;
+      if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
+      let handle = payload.hasFileHandle ? await getSharedHandle() : null;
+      if (handle && payload.fileName && handle.name && handle.name !== payload.fileName) handle = null;
+      applyDocumentData(data);
+      state.currentFileHandle = handle;
+      state.currentFileName = payload.fileName || handle?.name || '';
+      state.dirty = false;
+      updateStatus(`Aberto da Evolução: ${state.currentFileName || 'arquivo .upa24'}`);
+      return true;
+    } catch (error) {
+      console.error('Falha ao receber arquivo da Evolução.', error);
+      return false;
     }
   }
 
@@ -710,7 +751,7 @@
     }
   }
 
-  function initialize() {
+  async function initialize() {
     installEvolutionButton();
     bindEvents();
     registerServiceWorker();
@@ -718,7 +759,8 @@
     setInput('data', localDateISO());
     setUnit(getText($('.unidade')) || 'RIACHO GRANDE');
     updateAge();
-    applyGetParameters();
+    const receivedFromEvolution = await consumeEvolutionHandoff();
+    if (!receivedFromEvolution) applyGetParameters();
   }
 
   initialize();
