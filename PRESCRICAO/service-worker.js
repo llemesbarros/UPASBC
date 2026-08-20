@@ -1,8 +1,9 @@
-const CACHE_NAME = 'prescricao-medica-pwa-v1.1.2';
+const CACHE_NAME = 'prescricao-medica-pwa-v1.2.0';
 const APP_SHELL = [
   './',
   './index.html',
   './app.js',
+  './app-core.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
