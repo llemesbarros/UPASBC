@@ -3,7 +3,9 @@
   "name": "SisATIH - Preenchimento por PDF",
   "version": "0.1.0",
   "description": "Extrai localmente dados de fichas PDF do Hygia e auxilia o preenchimento das telas do SisATIH.",
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://regulacao.saobernardo.sp.gov.br/sisatih/*"
   ],
@@ -15,8 +17,16 @@
       "matches": [
         "https://regulacao.saobernardo.sp.gov.br/sisatih/a/solicitacao/nova*"
       ],
-      "js": ["parser.js", "content.js"],
-      "css": ["content.css"],
+      "js": [
+        "pdf-reader.js",
+        "hygia-utils.js",
+        "hygia-parser.js",
+        "form-fill.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_idle"
     }
   ]
