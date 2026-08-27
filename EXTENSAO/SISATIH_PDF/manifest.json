@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SisATIH - Preenchimento por PDF",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Extrai localmente dados de fichas PDF do Hygia e auxilia o preenchimento das telas do SisATIH.",
   "permissions": ["storage"],
   "host_permissions": [
