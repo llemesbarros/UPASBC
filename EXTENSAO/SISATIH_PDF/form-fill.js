@@ -16,8 +16,14 @@
     return max ? v.slice(0, max) : v;
   };
 
-  function elBy(selector) { return document.querySelector(selector); }
-  function mark(el) { if (el) el.classList.add('sisatih-pdf-filled'); }
+  function elBy(selector) {
+    return document.querySelector(selector);
+  }
+
+  function mark(el) {
+    if (el) el.classList.add('sisatih-pdf-filled');
+  }
+
   function hasValue(el) {
     if (!el) return false;
     if (el.type === 'radio' || el.type === 'checkbox') return el.checked;
@@ -27,6 +33,7 @@
   function setValue(el, value, options = {}) {
     if (!el || value === undefined || value === null || String(value).trim() === '') return false;
     if (!options.overwrite && hasValue(el)) return false;
+
     const valueToSet = options.max ? text(value, options.max) : String(value).trim();
     el.value = valueToSet;
     el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -35,8 +42,51 @@
     return true;
   }
 
-  function setSelector(selector, value, options) { return setValue(elBy(selector), value, options); }
-  function setName(name, value, options) { return setValue(document.querySelector(`[name="${CSS.escape(name)}"]`), value, options); }
+  function normalizeBrDate(value) {
+    const raw = String(value || '').trim();
+    let m = /^(\d{2})[\/.-](\d{2})[\/.-](\d{4})$/.exec(raw);
+    if (!m) {
+      const onlyDigits = raw.replace(/\D+/g, '');
+      m = /^(\d{2})(\d{2})(\d{4})$/.exec(onlyDigits);
+    }
+    if (!m) return '';
+
+    const day = Number(m[1]);
+    const month = Number(m[2]);
+    const year = Number(m[3]);
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return '';
+    return `${m[1]}/${m[2]}/${m[3]}`;
+  }
+
+  function isMaskedPlaceholder(value) {
+    const raw = String(value || '').trim();
+    return raw !== '' && !/[A-Za-z0-9]/.test(raw.replace(/_/g, ''));
+  }
+
+  function setDateField(selector, value) {
+    const el = elBy(selector);
+    const normalized = normalizeBrDate(value);
+    if (!el || !normalized) return false;
+    if (hasValue(el) && !isMaskedPlaceholder(el.value)) return false;
+
+    try { el.focus(); } catch (_) {}
+    el.value = normalized;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur', { bubbles: false }));
+    try { el.blur(); } catch (_) {}
+    mark(el);
+    return true;
+  }
+
+  function setSelector(selector, value, options) {
+    return setValue(elBy(selector), value, options);
+  }
+
+  function setName(name, value, options) {
+    return setValue(document.querySelector(`[name="${CSS.escape(name)}"]`), value, options);
+  }
 
   function setSelectValue(selector, value) {
     const el = elBy(selector);
@@ -66,7 +116,8 @@
     if (value === undefined || value === null) return false;
     const radios = [...document.querySelectorAll(`input[type="radio"][name="${CSS.escape(name)}"]`)];
     if (!radios.length || radios.some((radio) => radio.checked)) return false;
-    const radio = radios.find((item) => item.value === String(value));
+    const wanted = String(value);
+    const radio = radios.find((item) => item.value === wanted);
     if (!radio) return false;
     radio.click();
     mark(radio);
@@ -102,7 +153,9 @@
         seenRadio.add(el.name);
         const group = [...document.querySelectorAll(`input[type="radio"][name="${CSS.escape(el.name)}"]`)];
         if (!group.some((item) => item.checked)) missing.push(labelFor(el));
-      } else if (!String(el.value || '').trim()) missing.push(labelFor(el));
+      } else if (!String(el.value || '').trim()) {
+        missing.push(labelFor(el));
+      }
     }
     return [...new Set(missing.filter(Boolean))];
   }
@@ -118,6 +171,7 @@
     const visible = elBy(config.visible);
     const hidden = elBy(config.hidden);
     if ((visible && visible.value) || (hidden && hidden.value)) return false;
+
     const table = document.getElementById(config.table);
     if (table) {
       const row = [...table.querySelectorAll('tbody tr')].find((tr) => {
@@ -132,6 +186,7 @@
         return true;
       }
     }
+
     let changed = false;
     if (hidden) changed = setValue(hidden, code) || changed;
     if (visible) changed = setValue(visible, code) || changed;
@@ -143,18 +198,21 @@
     const p = data.patient || {};
     const c = data.clinician || {};
     const meta = data.meta || {};
+
     n += Number(setSelectText('#unidade', c.unit));
     n += Number(setSelector('#crm-medico', c.crm));
     if (c.crm) blur('#crm-medico');
     n += Number(setSelector('#nome-medico', c.name));
     n += Number(setName('pedidoDeSolicitacao.classificacaoDeGravidade', meta.gravity));
+
     n += Number(setSelector('#nome-paciente', p.name, { max: 100 }));
     n += Number(setSelector('#cns-paciente', p.cns));
     n += Number(setSelector('#cpf-paciente', p.cpf));
     n += Number(setSelector('#rg-paciente', p.rg));
     n += Number(setSelector('#nome-mae', p.motherName, { max: 100 }));
     n += Number(setRadio('pedidoDePaciente.sexo', p.sex === 'M' ? 'MASCULINO' : p.sex === 'F' ? 'FEMININO' : null));
-    n += Number(setSelector('#data-nascimento', p.birthDate));
+    n += Number(setDateField('#data-nascimento', p.birthDate));
+
     n += Number(setSelector('#telefone1-ddd', p.phoneDdd));
     n += Number(setSelector('#telefone1-paciente', p.phone));
     n += Number(setSelector('#logradouro-paciente', p.address && p.address.logradouro, { max: 100 }));
@@ -163,6 +221,7 @@
     n += Number(setSelector('#bairro-paciente', p.neighborhood, { max: 100 }));
     n += Number(setSelector('#cidade-paciente', p.city, { max: 100 }));
     n += Number(setSelectValue('#estados', p.state));
+
     return n;
   }
 
@@ -173,13 +232,16 @@
     const labs = data.labs || {};
     const meta = data.meta || {};
     const clinician = data.clinician || {};
+
     n += Number(setSelector('#historia-clinica', clinical.history || clinical.complaint, { max: 750 }));
     n += Number(setSelector('#exame-fisico', clinical.physicalExam, { max: 750 }));
+
     if (clinical.ventilation) {
       n += Number(setName('quadroClinico.tipoDeVentilacao', clinical.ventilation.tipo));
       n += Number(setName('quadroClinico.descricaoVentilacao', clinical.ventilation.descricao, { max: 100 }));
       n += Number(setSelectValue('#tipoVentilacao', clinical.ventilation.sinaisTipo));
     }
+
     if (clinical.vasoactive && clinical.vasoactive.value !== null) {
       n += Number(setRadio('quadroClinico.usaDrogaVasoativa', String(clinical.vasoactive.value)));
       if (clinical.vasoactive.value) n += Number(setSelector('#dose-vasoativa-droga', clinical.vasoactive.description, { max: 255 }));
@@ -196,29 +258,51 @@
       n += Number(setRadio('quadroClinico.estaSedado', String(clinical.sedation.value)));
       if (clinical.sedation.value) n += Number(setSelector('#dose-sedacao', clinical.sedation.description, { max: 255 }));
     }
+
     n += Number(setSelectValue('#glasgowSinais', vitals.glasgow));
     n += Number(setSelector('#data-internacao', meta.encounterDate));
     n += Number(setSelector('#hora-internacao', meta.encounterTime));
     blur('#data-internacao');
     blur('#hora-internacao');
+
     n += Number(setSelectValue('#select-estado-geral', vitals.state));
     n += Number(setSelector('#pressao-arterial', vitals.bloodPressure));
     n += Number(setSelector('#input-fc', vitals.heartRate));
     n += Number(setSelector('#input-fr', vitals.respiratoryRate));
     n += Number(setSelector('#temperatura', vitals.temperature));
     n += Number(setSelector('#saturacaoO2', vitals.saturation));
+
     const labMap = [
-      ['#sinais-vitais-hb', labs.hb], ['#sinais-vitais-ht', labs.ht], ['#sinais-vitais-leucograma', labs.leucograma],
-      ['[name="sinaisVitais.plq"]', labs.plq], ['#sinais-vitais-u', labs.u], ['#sinais-vitais-cr', labs.cr],
-      ['#sinais-vitais-na', labs.na], ['#sinais-vitais-k', labs.k], ['#sinais-vitais-tp', labs.tp], ['#sinais-vitais-ap', labs.ap],
-      ['#sinais-vitais-ttpa', labs.ttpa], ['#sinais-vitais-inr', labs.inr], ['#sinais-vitais-amilase', labs.amilase],
-      ['#sinais-vitais-lipase', labs.lipase], ['#sinais-vitais-cpk', labs.cpk], ['#sinais-vitais-ckmb', labs.ckmb],
+      ['#sinais-vitais-hb', labs.hb],
+      ['#sinais-vitais-ht', labs.ht],
+      ['#sinais-vitais-leucograma', labs.leucograma],
+      ['[name="sinaisVitais.plq"]', labs.plq],
+      ['#sinais-vitais-u', labs.u],
+      ['#sinais-vitais-cr', labs.cr],
+      ['#sinais-vitais-na', labs.na],
+      ['#sinais-vitais-k', labs.k],
+      ['#sinais-vitais-tp', labs.tp],
+      ['#sinais-vitais-ap', labs.ap],
+      ['#sinais-vitais-ttpa', labs.ttpa],
+      ['#sinais-vitais-inr', labs.inr],
+      ['#sinais-vitais-amilase', labs.amilase],
+      ['#sinais-vitais-lipase', labs.lipase],
+      ['#sinais-vitais-cpk', labs.cpk],
+      ['#sinais-vitais-ckmb', labs.ckmb],
       ['[name="sinaisVitais.troponina"]', labs.troponina]
     ];
     for (const [selector, value] of labMap) n += Number(setSelector(selector, value));
+
     n += Number(setSelector('#descricao-conduta', clinical.conduct, { max: 750 }));
-    (clinical.diagnoses || []).slice(0, 3).forEach((cid, index) => { n += Number(fillCid(index, cid)); });
-    if (fold(clinician.specialty).includes('CLINICA GERAL')) n += Number(setSelectText('#select-especialidade', 'CLÍNICA MÉDICA'));
+
+    (clinical.diagnoses || []).slice(0, 3).forEach((cid, index) => {
+      n += Number(fillCid(index, cid));
+    });
+
+    if (fold(clinician.specialty).includes('CLINICA GERAL')) {
+      n += Number(setSelectText('#select-especialidade', 'CLÍNICA MÉDICA'));
+    }
+
     return n;
   }
 
