@@ -108,7 +108,9 @@ A ausência de informação no PDF **não significa “Não”**. Por isso, a ex
 
 - `manifest.json` — Manifest V3 e escopo das páginas.
 - `background.js` — armazenamento efêmero de sessão.
-- `parser.js` — parser local de PDF textual, sem dependências externas.
+- `pdf-reader.js` — leitura local dos streams/texto do PDF.
+- `hygia-utils.js` e `hygia-parser.js` — extração estruturada da ficha Hygia/UPA.
+- `form-fill.js` — mapeamento dos dados para os campos do SisATIH.
 - `content.js` — painel e preenchimento dos controles do SisATIH.
 - `content.css` — estilos do painel e destaque de campos preenchidos.
 - `tests/smoke.js` — teste de fumaça opcional contra um PDF local informado pelo desenvolvedor.
