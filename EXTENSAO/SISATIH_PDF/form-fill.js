@@ -80,6 +80,38 @@
     return true;
   }
 
+  function normalizeBloodPressure(value) {
+    const raw = String(value || '').trim().toUpperCase();
+    const match = /(\d{2,3})\s*(?:\/|X)\s*(\d{2,3})/.exec(raw);
+    if (!match) return '';
+
+    const systolic = Number(match[1]);
+    const diastolic = Number(match[2]);
+    if (!Number.isInteger(systolic) || !Number.isInteger(diastolic)) return '';
+    if (systolic < 1 || systolic > 999 || diastolic < 1 || diastolic > 999) return '';
+
+    return `${String(systolic).padStart(3, '0')}X${String(diastolic).padStart(3, '0')}`;
+  }
+
+  function setBloodPressure(selector, value) {
+    const el = elBy(selector);
+    const normalized = normalizeBloodPressure(value);
+    if (!el || !normalized) return false;
+
+    // A máscara nativa do SisATIH mostra ___X___ mesmo quando o campo está vazio.
+    // Se já existir qualquer dígito, preservamos o valor digitado pelo usuário.
+    if (/\d/.test(String(el.value || ''))) return false;
+
+    try { el.focus(); } catch (_) {}
+    el.value = normalized;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new Event('blur', { bubbles: false }));
+    try { el.blur(); } catch (_) {}
+    mark(el);
+    return true;
+  }
+
   function setSelector(selector, value, options) {
     return setValue(elBy(selector), value, options);
   }
@@ -153,6 +185,8 @@
         seenRadio.add(el.name);
         const group = [...document.querySelectorAll(`input[type="radio"][name="${CSS.escape(el.name)}"]`)];
         if (!group.some((item) => item.checked)) missing.push(labelFor(el));
+      } else if (el.id === 'pressao-arterial' && !/\d/.test(String(el.value || ''))) {
+        missing.push(labelFor(el));
       } else if (!String(el.value || '').trim()) {
         missing.push(labelFor(el));
       }
@@ -266,7 +300,7 @@
     blur('#hora-internacao');
 
     n += Number(setSelectValue('#select-estado-geral', vitals.state));
-    n += Number(setSelector('#pressao-arterial', vitals.bloodPressure));
+    n += Number(setBloodPressure('#pressao-arterial', vitals.bloodPressure));
     n += Number(setSelector('#input-fc', vitals.heartRate));
     n += Number(setSelector('#input-fr', vitals.respiratoryRate));
     n += Number(setSelector('#temperatura', vitals.temperature));
