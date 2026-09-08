@@ -13,6 +13,72 @@
   if (!reader || !utils) throw new Error('Módulos do parser SisATIH não carregados.');
   const { fold, clean, digits, truncate, firstMatch, findSection, valueAfterLabel, parseAddress, mapGravity, mapGeneralState, parseVentilation, findMedicationEvidence, extractLabValue, parseCidCodes } = utils;
 
+  function normalizeDate(value) {
+    const match = /\b(\d{2})\/(\d{2})\/(\d{4})\b/.exec(String(value || ''));
+    if (!match) return '';
+    const day = Number(match[1]);
+    const month = Number(match[2]);
+    const year = Number(match[3]);
+    const date = new Date(year, month - 1, day);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return '';
+    return `${match[1]}/${match[2]}/${match[3]}`;
+  }
+
+  function extractBirthDate(lines) {
+    const labelIndexes = [];
+    lines.forEach((line, index) => {
+      const current = fold(line);
+      const previous = index > 0 ? fold(lines[index - 1]) : '';
+      const next = index + 1 < lines.length ? fold(lines[index + 1]) : '';
+      const directLabel = /DATA\s*NASC(?:IMENTO)?\b/i.test(current);
+      const splitLabel = current.includes('NASC') && previous.includes('DATA')
+        || current.includes('DATA') && next.includes('NASC');
+      if (directLabel || splitLabel) labelIndexes.push(index);
+    });
+
+    // Primeiro tenta a própria linha do rótulo. Depois amplia a busca ao redor.
+    // Alguns PDFs do Hygia fragmentam visualmente "DATA NASC DD/MM/AAAA" em
+    // linhas de texto independentes e podem colocar a data antes do rótulo.
+    for (const labelIndex of labelIndexes) {
+      const sameLine = normalizeDate(lines[labelIndex]);
+      if (sameLine) return sameLine;
+
+      for (let distance = 1; distance <= 5; distance++) {
+        const indexes = [labelIndex - distance, labelIndex + distance];
+        for (const index of indexes) {
+          if (index < 0 || index >= lines.length) continue;
+          const candidate = normalizeDate(lines[index]);
+          if (candidate) return candidate;
+        }
+      }
+    }
+
+    // Fallback restrito ao bloco de identificação do paciente, evitando datas
+    // de atendimento/classificação de risco mais abaixo na ficha.
+    const idIndex = lines.findIndex((line) => /\bRG\b/i.test(line) && /\bCPF\b/i.test(line) && /\bCNS\b/i.test(line));
+    const motherIndex = lines.findIndex((line) => fold(line).startsWith('NOME DA MAE'));
+    if (idIndex >= 0) {
+      const end = motherIndex > idIndex ? motherIndex : Math.min(lines.length, idIndex + 14);
+      for (let i = idIndex; i <= end; i++) {
+        const candidate = normalizeDate(lines[i]);
+        if (candidate) return candidate;
+      }
+    }
+
+    return '';
+  }
+
+  function extractPhone(lines) {
+    const phoneIndex = lines.findIndex((line) => fold(line).includes('TELEFONE'));
+    if (phoneIndex < 0) return { ddd: '', number: '' };
+
+    const windowText = lines.slice(phoneIndex, Math.min(lines.length, phoneIndex + 3)).join(' ');
+    const match = /TELEFONE\s*\(\s*(\d{2})\s*\)\s*([\d\s-]{8,})/i.exec(windowText);
+    if (!match) return { ddd: '', number: '' };
+
+    return { ddd: digits(match[1]), number: digits(match[2]) };
+  }
+
   function parseFromLines(pages) {
     const p1 = pages[0] || [];
     const p2 = pages[1] || [];
@@ -37,8 +103,8 @@
     const idLine = p1.find((line) => /\bRG\s+\S+\s+CPF\s+\S+\s+CNS\s+\S+/i.test(line)) || '';
     const ids = /RG\s+([^\s]+)\s+CPF\s+([^\s]+)\s+CNS\s+([^\s]+)/i.exec(idLine);
 
-    const contactLine = p1.find((line) => fold(line).includes('TELEFONE') && fold(line).includes('DATA NASC')) || '';
-    const phone = /TELEFONE\s*\(\s*(\d{2})\s*\)\s*([\d\s-]+)\s+DATA\s*NASC\s+(\d{2}\/\d{2}\/\d{4})/i.exec(contactLine);
+    const birthDate = extractBirthDate(p1);
+    const phone = extractPhone(p1);
 
     const motherLine = p1.find((line) => fold(line).startsWith('NOME DA MAE ')) || '';
     const motherName = valueAfterLabel(motherLine, 'NOME DA MÃE', []);
@@ -74,7 +140,7 @@
     const conduct = clean([medication, otherConduct, orientation].filter(Boolean).join(' | '));
 
     const obsLine = p1.find((line) => fold(line).includes('OBSERVACAO:')) || '';
-    const pa = firstMatch([obsLine, ...p1], /\bPA\s*:\s*(\d{2,3}\s*\/\s*\d{2,3})\b/i).replace(/\s+/g, '');
+    const pa = firstMatch([obsLine, ...p1], /\bPA\s*:\s*(\d{2,3}\s*(?:\/|X)\s*\d{2,3})\b/i).replace(/\s+/g, '').replace(/X/i, '/');
     const pulse = firstMatch([obsLine, ...p1], /\bPULSO\s*:\s*(\d{2,3})\s*BPM\b/i);
     const glasgow = firstMatch(p1, /\bGLASGOW\s+(\d{1,2})\b/i);
     const glucose = firstMatch(p1, /\bGLICEMIA\s+(\d{2,3})\b/i);
@@ -132,7 +198,7 @@
     return {
       meta: { source: 'HygiaWeb UPA_FAAPosAt', encounterDate, encounterTime: encounterTime ? encounterTime.slice(0, 5) : '', gravity: mapGravity([...p1, ...p2]), gravitySource: mapGravity([...p1, ...p2]) ? 'Classificação de risco do PDF' : '' },
       clinician: { name: clinicianName, crm, unit: unitMatch ? clean(unitMatch[1]) : '', specialty: specialtyMatch ? clean(specialtyMatch[1]) : '' },
-      patient: { name: patientName, sex, rg: ids ? digits(ids[1]) : '', cpf: ids ? digits(ids[2]) : '', cns: ids ? digits(ids[3]) : '', motherName, birthDate: phone ? phone[3] : '', phoneDdd: phone ? digits(phone[1]) : '', phone: phone ? digits(phone[2]) : '', address: parsedAddress, neighborhood, city, state },
+      patient: { name: patientName, sex, rg: ids ? digits(ids[1]) : '', cpf: ids ? digits(ids[2]) : '', cns: ids ? digits(ids[3]) : '', motherName, birthDate, phoneDdd: phone.ddd, phone: phone.number, address: parsedAddress, neighborhood, city, state },
       clinical: { complaint: truncate(complaint, 750), history: truncate(clean([hda, hpp].filter(Boolean).join(' | ')) || complaint, 750), physicalExam: truncate(physicalExam, 750), conduct: truncate(conduct, 750), ventilation, vasoactive, antibiotic, isolation: { value: isolation, type: isolationType }, sedation: { value: sedated, description: sedationDescription }, diagnoses: cidCodes },
       vitals: { state: mapGeneralState(physicalExam), bloodPressure: pa, heartRate: pulse, respiratoryRate: fr, temperature, saturation, glasgow, glucose },
       labs,
@@ -147,5 +213,5 @@
     return parsed;
   }
 
-  return { parsePdf, extractPageLines: reader.extractPageLines, parseFromLines, _internals: { fold, clean, parseAddress, parseVentilation } };
+  return { parsePdf, extractPageLines: reader.extractPageLines, parseFromLines, _internals: { fold, clean, parseAddress, parseVentilation, extractBirthDate, extractPhone } };
 });
