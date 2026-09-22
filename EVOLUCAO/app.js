@@ -20,6 +20,8 @@
     { aliases:['UPA PAULICEIA/TABOAO','UPA PAULICÉIA/TABOÃO','PAULICEIA/TABOAO','PAULICÉIA/TABOÃO'], nome:'UPA PAULICEIA/TABOAO', endereco:'Rua Pedro de Tolêdo, nº 326 - Paulicéia', cidade:'São Bernardo do Campo/SP' },
     { aliases:['UPA SAO PEDRO','UPA SÃO PEDRO','SAO PEDRO','SÃO PEDRO'], nome:'UPA SAO PEDRO', endereco:'Av. Dom Pedro de Alcântara, nº 273 - Montanhão', cidade:'São Bernardo do Campo/SP' },
     { aliases:['UPA SILVINA','SILVINA'], nome:'UPA SILVINA', endereco:'Av. Dr. José Fornari, nº 509 - Ferrazópolis', cidade:'São Bernardo do Campo/SP' },
+    { aliases:['UPA JARDIM SILVINA / SELECTA','UPA JARDIM SILVINA/SELECTA','JARDIM SILVINA / SELECTA','JARDIM SILVINA/SELECTA','SELECTA'], nome:'UPA JARDIM SILVINA / SELECTA', endereco:'Av. Conde de São Lourenço - Ferrazópolis', cidade:'São Bernardo do Campo/SP', telefone:'(11) 4338-0339', cnes:'4517512' },
+    { aliases:['PRONTO ATENDIMENTO (PA TABOÃO)','PRONTO ATENDIMENTO (PA TABOAO)','PA TABOÃO','PA TABOAO','PRONTO ATENDIMENTO TABOÃO','PRONTO ATENDIMENTO TABOAO'], nome:'PRONTO ATENDIMENTO (PA TABOÃO)', endereco:'Av. do Taboão - Taboão', cidade:'São Bernardo do Campo/SP', telefone:'(11) 4786-5901', cnes:'9906894' },
     { aliases:['UPA UNIÃO/ALVARENGA','UPA UNIAO/ALVARENGA','UNIÃO/ALVARENGA','UNIAO/ALVARENGA'], nome:'UPA UNIÃO/ALVARENGA', endereco:'Estrada dos Alvarengas, nº 5779 - Alvarenga', cidade:'São Bernardo do Campo/SP' },
   ];
 
