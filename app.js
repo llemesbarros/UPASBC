@@ -70,6 +70,31 @@ const UNIDADES = [
     cnes: ""
   },
   {
+    aliases: [
+      "UPA JARDIM SILVINA / SELECTA",
+      "UPA JARDIM SILVINA/SELECTA",
+      "UPA JARDIM SILVINA SELECTA"
+    ],
+    nome: "UPA JARDIM SILVINA / SELECTA",
+    endereco: "Av. Conde de São Lourenço - Ferrazópolis, São Bernardo do Campo - SP, 09791-260",
+    cidade: "São Bernardo do Campo/SP",
+    telefone: "(11) 4338-0339",
+    cnes: "4517512"
+  },
+  {
+    aliases: [
+      "PRONTO ATENDIMENTO (PA TABOÃO)",
+      "PRONTO ATENDIMENTO (PA TABOAO)",
+      "PA TABOÃO",
+      "PA TABOAO"
+    ],
+    nome: "PRONTO ATENDIMENTO (PA TABOÃO)",
+    endereco: "Av. do Taboão - Taboão, São Bernardo do Campo - SP, 09657-000",
+    cidade: "São Bernardo do Campo/SP",
+    telefone: "(11) 4786-5901",
+    cnes: "9906894"
+  },
+  {
     aliases: ["UPA UNIÃO/ALVARENGA", "UPA UNIAO/ALVARENGA"],
     nome: "UPA UNIÃO/ALVARENGA",
     endereco: "Estrada dos Alvarengas, nº 5779 - Alvarenga",
